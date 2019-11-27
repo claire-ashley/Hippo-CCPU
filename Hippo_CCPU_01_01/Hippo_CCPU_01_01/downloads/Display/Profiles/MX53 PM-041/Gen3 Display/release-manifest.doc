@@ -1,21 +1,22 @@
 
 HED, Inc. PM-041-Arranger Release Manifest
-Copyright (c) HED, Inc. 2016
+Copyright (c) HED, Inc. 2018
 
 Linux 2.6.35.3-hed
-PM-041-Arranger V1.0.15-gb5109af
-HELDK4 V4.0.11-gdd96276
-Mon Oct 10 13:56:15 CDT 2016
+PM-041-Arranger V1.1.5-gf264611
+HELDK4 V4.1.5-g58c5f7c
+ V
+Thu Apr  5 16:48:24 CDT 2018
 
 Installed applications
 ######################################################
 
 Buildroot 2015.05-hed
 ######################################################
+ArrangerLinux-3.2.0
 acl-2.2.52
 alsa-lib-1.0.29
 alsa-utils-1.0.29
-ArrangerLinux-3.1.1
 attr-2.4.47
 buildroot-config
 busybox-1.23.2
@@ -58,8 +59,8 @@ host-libpng-1.6.16
 host-libpthread-stubs-0.3
 host-libtool-2.4.6
 host-libxcb-1.11
-host-libxml2-2.9.2
 host-libxml-parser-perl-2.41
+host-libxml2-2.9.2
 host-libxslt-1.1.28
 host-lzo-2.08
 host-lzop-1.03
@@ -80,15 +81,15 @@ host-xapp_xkbcomp-1.3.0
 host-xcb-proto-1.11
 host-xfont_encodings-1.0.4
 host-xfont_font-util-1.3.1
-host-xlib_libfontenc-1.1.2
 host-xlib_libX11-1.6.3
 host-xlib_libXau-1.0.8
 host-xlib_libXcursor-1.1.14
 host-xlib_libXdmcp-1.1.2
 host-xlib_libXfixes-5.0.1
 host-xlib_libXfont-1.5.1
-host-xlib_libxkbfile-1.0.8
 host-xlib_libXrender-0.9.8
+host-xlib_libfontenc-1.1.2
+host-xlib_libxkbfile-1.0.8
 host-xlib_xtrans-1.3.5
 host-xproto_fixesproto-5.0
 host-xproto_fontsproto-2.1.3
@@ -101,6 +102,7 @@ host-xproto_xproto-7.0.27
 host-xutil_util-macros-1.19.0
 host-zic-2015c
 host-zlib-1.2.8
+htop-1.0.3
 i2c-tools-3.1.1
 imagemagick-6.9.1-1
 iproute2-4.0.0
@@ -170,7 +172,6 @@ xfont_font-cursor-misc-1.0.3
 xfont_font-misc-misc-1.1.2
 xfont_font-util-1.3.1
 xkeyboard-config-2.14
-xlib_libfontenc-1.1.2
 xlib_libICE-1.0.9
 xlib_libSM-1.2.2
 xlib_libX11-1.6.3
@@ -185,7 +186,6 @@ xlib_libXfont-1.5.1
 xlib_libXft-2.3.2
 xlib_libXi-1.7.4
 xlib_libXinerama-1.1.3
-xlib_libxkbfile-1.0.8
 xlib_libXmu-1.1.2
 xlib_libXpm-3.5.11
 xlib_libXrandr-1.4.2
@@ -195,6 +195,8 @@ xlib_libXt-1.1.4
 xlib_libXtst-1.2.2
 xlib_libXv-1.0.10
 xlib_libXxf86vm-1.1.4
+xlib_libfontenc-1.1.2
+xlib_libxkbfile-1.0.8
 xlib_xtrans-1.3.5
 xproto_bigreqsproto-1.1.2
 xproto_compositeproto-0.4.2
@@ -222,5 +224,5 @@ xterm-314
 xutil_util-macros-1.19.0
 xvkbd-3.2
 zlib-1.2.8
-build-time.log
 _users_table.txt
+build-time.log
