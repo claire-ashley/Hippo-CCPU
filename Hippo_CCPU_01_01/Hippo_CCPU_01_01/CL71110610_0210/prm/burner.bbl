@@ -1,0 +1,132 @@
+/* This is *.bbl file for 9S12XDP512 */
+/* physical s-record file */
+OPENFILE "%ABS_FILE%.phy"
+format = motorola
+busWidth = 1
+
+/* Insert global address info from constants.c */
+len = 0x50000
+origin = 0x1700000
+destination = 0x700000
+SENDBYTE 1 "%ABS_FILE%"
+
+len = 0x4000
+origin = 0xE08000
+destination = 0x780000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xE18000
+destination = 0x784000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xE28000
+destination = 0x788000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xE38000
+destination = 0x78C000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xE48000
+destination = 0x790000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xE58000
+destination = 0x794000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xE68000
+destination = 0x798000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xE78000
+destination = 0x79C000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xE88000
+destination = 0x7A0000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xE98000
+destination = 0x7A4000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xEA8000
+destination = 0x7A8000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xEB8000
+destination = 0x7AC000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xEC8000
+destination = 0x7B0000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xED8000
+destination = 0x7B4000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xEE8000
+destination = 0x7B8000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xEF8000
+destination = 0x7BC000
+SENDBYTE 1 "%ABS_FILE%"
+
+origin = 0xF08000
+destination = 0x7C0000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xF18000
+destination = 0x7C4000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xF28000
+destination = 0x7C8000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xF38000
+destination = 0x7CC000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xF48000
+destination = 0x7D0000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xF58000
+destination = 0x7D4000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xF68000
+destination = 0x7D8000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xF78000
+destination = 0x7DC000
+SENDBYTE 1 "%ABS_FILE%"
+
+/* Insert global address info from constants.c */
+len = 0x20000
+origin = 0x17E0000
+destination = 0x7E0000
+SENDBYTE 1 "%ABS_FILE%"
+
+
+/* there shouldn't be anything in this address range */
+len = 0x4000
+origin = 0xF88000
+destination = 0x7E0000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xF98000
+destination = 0x7E4000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xFA8000
+destination = 0x7E8000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xFB8000
+destination = 0x7EC000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xFC8000
+
+/* the normal data should start here */
+destination = 0x7F0000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xFE8000
+destination = 0x7F8000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0xFD8000
+destination = 0x7F4000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0x004000
+destination = 0x7F4000
+SENDBYTE 1 "%ABS_FILE%"
+
+origin = 0xFF8000
+destination = 0x7FC000
+SENDBYTE 1 "%ABS_FILE%"
+origin = 0x00C000
+destination = 0x7FC000
+SENDBYTE 1 "%ABS_FILE%"
+
+CLOSE
+

@@ -1,0 +1,2684 @@
+ANSI-C/cC++ Compiler for HC12 V-5.0.41 Build 10203, Jul 23 2010
+
+    1:  /*
+    2:  ** ###################################################################
+    3:  **     Filename  : User_App.c
+    4:  **     Processor : Not applicable
+    5:  **     FileFormat: V1.00
+    6:  **     Abstract  :
+    7:  **          This is where the User application software is located
+    8:  **          This function gets called once a loop
+    9:  **
+   10:  **     (c) Copyright HED, inc. 2006-2008
+   11:  **     HED, inc.
+   12:  **     2120 Constitution Ave.
+   13:  **     Hartford, WI 53089
+   14:  **     United States
+   15:  **     http      : www.hedonline.com
+   16:  **     mail      : support@hedonline.com
+   17:  ** ###################################################################
+   18:  */
+   19:  
+   20:  /* Include Header Files */
+   21:  #include "reserved.h"
+   22:  #include "prototypes.h"
+   23:  #include "constants.h"
+   24:  #include "user_app.h"
+   25:  #include <math.h>
+   26:  
+   27:  #pragma DATA_SEG __RPAGE_SEG PAGED_RAM_USER_APP
+   28:     App_Structure_ As;
+   29:  #pragma DATA_SEG DEFAULT
+   30:  
+   31:  void User_App(void)
+   32:  {
+
+Function: User_App
+Source  : C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources\User_App.c
+Options : -Cf -CPUHCS12XE -D__MAP_FLASH__ -D__FAR_DATA -Env"GENPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\prm;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\cmd;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Object_Code;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -Env"LIBPATH=C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -EnvOBJPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -EnvTEXTPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -Lasm=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o.lst -Mb -MapFlash -Ot -ObjN=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o -TD4LD4LLD4
+
+   33:     #pragma DATA_SEG __RPAGE_SEG PAGED_RAM_USER
+   34:        static UINT8  uint8_heartbeat_count = (UINT8) 0;
+   35:     #pragma DATA_SEG DEFAULT
+   36:     
+   37:     /*
+   38:     ** ###################################################################
+   39:     ** HeartBeat                   
+   40:     ** ###################################################################
+   41:     */
+   42:     if(uint8_heartbeat_count < FIVE_HUNDRED_MSECS)
+  0000 c600         [1]     LDAB  #PAGE(uint8_heartbeat_count)
+  0002 5b16         [2]     STAB  /*RPAGE*/22
+  0004 f60000       [3]     LDAB  uint8_heartbeat_count
+  0007 c132         [1]     CMPB  #50
+  0009 2404         [3/1]   BCC   *+6 ;abs = 000f
+   43:     {
+   44:        Heart_Beat_Control((UINT8) 1);
+  000b c601         [1]     LDAB  #1
+   45:        uint8_heartbeat_count++;
+   46:     }
+  000d 2005         [3]     BRA   *+7 ;abs = 0014
+   47:     else if(uint8_heartbeat_count < ONE_SECOND) 
+  000f c164         [1]     CMPB  #100
+  0011 240c         [3/1]   BCC   *+14 ;abs = 001f
+   48:     {
+   49:        Heart_Beat_Control((UINT8) 0);
+  0013 c7           [1]     CLRB  
+  0014 4a000000     [7]     CALL  Heart_Beat_Control,PAGE(Heart_Beat_Control)
+   50:        uint8_heartbeat_count++;
+  0018 c600         [1]     LDAB  #PAGE(uint8_heartbeat_count)
+  001a 5b16         [2]     STAB  /*RPAGE*/22
+  001c 720000       [4]     INC   uint8_heartbeat_count
+   51:     }
+   52:     
+   53:     if(uint8_heartbeat_count >= ONE_SECOND)
+  001f f60000       [3]     LDAB  uint8_heartbeat_count
+  0022 c164         [1]     CMPB  #100
+  0024 2503         [3/1]   BCS   *+5 ;abs = 0029
+   54:     {
+   55:        uint8_heartbeat_count = 0;
+  0026 790000       [3]     CLR   uint8_heartbeat_count
+   56:     }
+   57:     
+   58:         pwmBackLight_VALUE = 700;
+  0029 cc02bc       [2]     LDD   #700
+  002c 180b000016   [4]     MOVB  #PAGE(IOMap),/*RPAGE*/22
+  0031 7c0000       [3]     STD   IOMap:126
+   59:         Screen_Control();
+  0034 4a000000     [7]     CALL  Screen_Control,PAGE(Screen_Control)
+   60:         Sensor_Control();
+  0038 4a000000     [7]     CALL  Sensor_Control,PAGE(Sensor_Control)
+   61:         Engine_Control();
+  003c 4a000000     [7]     CALL  Engine_Control,PAGE(Engine_Control)
+   62:         Radio_Control();
+  0040 4a000000     [7]     CALL  Radio_Control,PAGE(Radio_Control)
+   63:         Flow_Control();
+  0044 4a000000     [7]     CALL  Flow_Control,PAGE(Flow_Control)
+   64:         Warning_Ribbons();
+  0048 4a000000     [7]     CALL  Warning_Ribbons,PAGE(Warning_Ribbons)
+   65:         Send_CAN();
+  004c 4a000000     [7]     CALL  Send_CAN,PAGE(Send_CAN)
+   66:  
+   67:  }
+  0050 0a           [7]     RTC   
+   68:  
+   69:  /******************************           SCREEN AND BUTTON MANAGEMENT       ************************************/
+   70:  /****************************************************************************************************************/
+   71:  
+   72:  void Screen_Control(void)
+   73:  {
+
+Function: Screen_Control
+Source  : C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources\User_App.c
+Options : -Cf -CPUHCS12XE -D__MAP_FLASH__ -D__FAR_DATA -Env"GENPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\prm;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\cmd;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Object_Code;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -Env"LIBPATH=C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -EnvOBJPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -EnvTEXTPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -Lasm=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o.lst -Mb -MapFlash -Ot -ObjN=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o -TD4LD4LLD4
+
+  0000 1b9e         [2]     LEAS  -2,SP
+   74:     uint16_t ui16_buttons_pressed = Process_Buttons();
+  0002 4a000000     [7]     CALL  Process_Buttons,PAGE(Process_Buttons)
+  0006 6c80         [2]     STD   0,SP
+   75:        
+   76:      /* ScreenSequenceTimer*/
+   77:     if (tonServScreen_VALUE > 0)
+  0008 c600         [1]     LDAB  #PAGE(IOMap)
+  000a 5b16         [2]     STAB  /*RPAGE*/22
+  000c fc0000       [3]     LDD   IOMap:584
+  000f 2708         [3/1]   BEQ   *+10 ;abs = 0019
+   78:     {
+   79:  	   tonServScreen_STATUS = TRUE;
+  0011 c601         [1]     LDAB  #1
+  0013 87           [1]     CLRA  
+  0014 7c0000       [3]     STD   IOMap:694
+   80:     }
+  0017 201a         [3]     BRA   *+28 ;abs = 0033
+   81:     else
+   82:     {
+   83:  	   tonServScreen_STATUS = FALSE;
+  0019 18790000     [4]     CLRW  IOMap:694
+   84:  	   if ((V_Screen_Number == 4) && (qScreen1Shot == FALSE))
+  001d fc0000       [3]     LDD   IOMap:324
+  0020 8c0004       [2]     CPD   #4
+  0023 260e         [3/1]   BNE   *+16 ;abs = 0033
+  0025 fc0000       [3]     LDD   IOMap:404
+  0028 2609         [3/1]   BNE   *+11 ;abs = 0033
+   85:  	   {
+   86:  		   qScreen1Shot = TRUE;
+  002a c601         [1]     LDAB  #1
+  002c 87           [1]     CLRA  
+  002d 7c0000       [3]     STD   IOMap:404
+   87:  		   V_Screen_Number = Screen_Screen1; 
+  0030 7c0000       [3]     STD   IOMap:324
+   88:  	   }
+   89:   
+   90:     }
+   91:     switch(V_Screen_Number)
+  0033 fe0000       [3]     LDX   IOMap:324
+  0036 8e0001       [2]     CPX   #1
+  0039 b756         [1]     TFR   X,Y
+  003b 250f         [3/1]   BCS   *+17 ;abs = 004c
+  003d 8e0004       [2]     CPX   #4
+  0040 220a         [3/1]   BHI   *+12 ;abs = 004c
+  0042 09           [1]     DEX   
+  0043 b754         [1]     TFR   X,D
+  0045 160000       [4]     JSR   _CASE_DIRECT_BYTE
+  0048 11           DC.B  17
+  0049 19           DC.B  25
+  004a 09           DC.B  9
+  004b 29           DC.B  41
+  004c 8d0006       [2]     CPY   #6
+  004f 2718         [3/1]   BEQ   *+26 ;abs = 0069
+   92:     {
+   93:        case Screen_Screen1:
+   94:             Process_Screen_1(ui16_buttons_pressed); 	   
+   95:      	   break;
+   96:        case Screen_Screen2:
+   97:            Process_Screen_2(ui16_buttons_pressed); 	   
+   98:      	   break;
+   99:        case Screen_Screen3:
+  100:            Process_Screen_3(ui16_buttons_pressed); 	   
+  101:      	   break;
+  102:        case Screen_Screen4:
+  103:            Process_Screen_4(ui16_buttons_pressed); 	   
+  104:      	   break;
+  105:        default:
+  106:      	    V_Screen_Number = Screen_Screen4;
+  0051 c604         [1]     LDAB  #4
+  0053 87           [1]     CLRA  
+  0054 7c0000       [3]     STD   IOMap:324
+  107:      	   break;
+  0057 201e         [3]     BRA   *+32 ;abs = 0077
+  0059 ec80         [3]     LDD   0,SP
+  005b 4a000000     [7]     CALL  Process_Screen_1,PAGE(Process_Screen_1)
+  005f 2016         [3]     BRA   *+24 ;abs = 0077
+  0061 ec80         [3]     LDD   0,SP
+  0063 4a000000     [7]     CALL  Process_Screen_2,PAGE(Process_Screen_2)
+  0067 200e         [3]     BRA   *+16 ;abs = 0077
+  0069 ec80         [3]     LDD   0,SP
+  006b 4a000000     [7]     CALL  Process_Screen_3,PAGE(Process_Screen_3)
+  006f 2006         [3]     BRA   *+8 ;abs = 0077
+  0071 ec80         [3]     LDD   0,SP
+  0073 4a000000     [7]     CALL  Process_Screen_4,PAGE(Process_Screen_4)
+  108:     }
+  109:  }
+  0077 1b82         [2]     LEAS  2,SP
+  0079 0a           [7]     RTC   
+  110:  
+  111:  uint16_t Process_Buttons(void)
+  112:  {
+
+Function: Process_Buttons
+Source  : C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources\User_App.c
+Options : -Cf -CPUHCS12XE -D__MAP_FLASH__ -D__FAR_DATA -Env"GENPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\prm;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\cmd;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Object_Code;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -Env"LIBPATH=C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -EnvOBJPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -EnvTEXTPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -Lasm=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o.lst -Mb -MapFlash -Ot -ObjN=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o -TD4LD4LLD4
+
+  113:     uint16_t ui16_buttons_pressed = 0;
+  114:     
+  115:     ui16_buttons_pressed |= Check_Button(I_Button_01   , BUTTON_01   );
+  0000 c600         [1]     LDAB  #PAGE(IOMap)
+  0002 5b16         [2]     STAB  /*RPAGE*/22
+  0004 fc0000       [3]     LDD   IOMap:72
+  0007 6cac         [2]     STD   4,-SP
+  0009 c601         [1]     LDAB  #1
+  000b 87           [1]     CLRA  
+  000c 4a000000     [7]     CALL  Check_Button,PAGE(Check_Button)
+  0010 6ca1         [2]     STD   2,+SP
+  116:     ui16_buttons_pressed |= Check_Button(I_Button_02   , BUTTON_02   );
+  0012 c600         [1]     LDAB  #PAGE(IOMap)
+  0014 5b16         [2]     STAB  /*RPAGE*/22
+  0016 fc0000       [3]     LDD   IOMap:74
+  0019 3b           [2]     PSHD  
+  001a c602         [1]     LDAB  #2
+  001c 87           [1]     CLRA  
+  001d 4a000000     [7]     CALL  Check_Button,PAGE(Check_Button)
+  0021 1b82         [2]     LEAS  2,SP
+  0023 ea81         [3]     ORAB  1,SP
+  0025 aa80         [3]     ORAA  0,SP
+  0027 6c80         [2]     STD   0,SP
+  117:     ui16_buttons_pressed |= Check_Button(I_Button_03   , BUTTON_03   );
+  0029 c600         [1]     LDAB  #PAGE(IOMap)
+  002b 5b16         [2]     STAB  /*RPAGE*/22
+  002d fc0000       [3]     LDD   IOMap:76
+  0030 3b           [2]     PSHD  
+  0031 c604         [1]     LDAB  #4
+  0033 87           [1]     CLRA  
+  0034 4a000000     [7]     CALL  Check_Button,PAGE(Check_Button)
+  0038 1b82         [2]     LEAS  2,SP
+  003a ea81         [3]     ORAB  1,SP
+  003c aa80         [3]     ORAA  0,SP
+  003e 6c80         [2]     STD   0,SP
+  118:     ui16_buttons_pressed |= Check_Button(I_Button_04   , BUTTON_04   );
+  0040 c600         [1]     LDAB  #PAGE(IOMap)
+  0042 5b16         [2]     STAB  /*RPAGE*/22
+  0044 fc0000       [3]     LDD   IOMap:78
+  0047 3b           [2]     PSHD  
+  0048 c608         [1]     LDAB  #8
+  004a 87           [1]     CLRA  
+  004b 4a000000     [7]     CALL  Check_Button,PAGE(Check_Button)
+  004f 1b82         [2]     LEAS  2,SP
+  0051 ea81         [3]     ORAB  1,SP
+  0053 aa80         [3]     ORAA  0,SP
+  0055 6c80         [2]     STD   0,SP
+  119:                                                                    
+  120:     ui16_buttons_pressed |= Check_Button(I_Button_Up   , BUTTON_UP   );
+  0057 c600         [1]     LDAB  #PAGE(IOMap)
+  0059 5b16         [2]     STAB  /*RPAGE*/22
+  005b fc0000       [3]     LDD   IOMap:84
+  005e 3b           [2]     PSHD  
+  005f c610         [1]     LDAB  #16
+  0061 87           [1]     CLRA  
+  0062 4a000000     [7]     CALL  Check_Button,PAGE(Check_Button)
+  0066 1b82         [2]     LEAS  2,SP
+  0068 ea81         [3]     ORAB  1,SP
+  006a aa80         [3]     ORAA  0,SP
+  006c 6c80         [2]     STD   0,SP
+  121:     ui16_buttons_pressed |= Check_Button(I_Button_Down , BUTTON_DOWN );
+  006e c600         [1]     LDAB  #PAGE(IOMap)
+  0070 5b16         [2]     STAB  /*RPAGE*/22
+  0072 fc0000       [3]     LDD   IOMap:86
+  0075 3b           [2]     PSHD  
+  0076 c620         [1]     LDAB  #32
+  0078 87           [1]     CLRA  
+  0079 4a000000     [7]     CALL  Check_Button,PAGE(Check_Button)
+  007d 1b82         [2]     LEAS  2,SP
+  007f ea81         [3]     ORAB  1,SP
+  0081 aa80         [3]     ORAA  0,SP
+  0083 6c80         [2]     STD   0,SP
+  122:     ui16_buttons_pressed |= Check_Button(I_Button_Left , BUTTON_LEFT );
+  0085 c600         [1]     LDAB  #PAGE(IOMap)
+  0087 5b16         [2]     STAB  /*RPAGE*/22
+  0089 fc0000       [3]     LDD   IOMap:80
+  008c 3b           [2]     PSHD  
+  008d c640         [1]     LDAB  #64
+  008f 87           [1]     CLRA  
+  0090 4a000000     [7]     CALL  Check_Button,PAGE(Check_Button)
+  0094 1b82         [2]     LEAS  2,SP
+  0096 ea81         [3]     ORAB  1,SP
+  0098 aa80         [3]     ORAA  0,SP
+  009a 6c80         [2]     STD   0,SP
+  123:     ui16_buttons_pressed |= Check_Button(I_Button_Right, BUTTON_RIGHT);
+  009c c600         [1]     LDAB  #PAGE(IOMap)
+  009e 5b16         [2]     STAB  /*RPAGE*/22
+  00a0 fc0000       [3]     LDD   IOMap:82
+  00a3 3b           [2]     PSHD  
+  00a4 c680         [1]     LDAB  #128
+  00a6 87           [1]     CLRA  
+  00a7 4a000000     [7]     CALL  Check_Button,PAGE(Check_Button)
+  00ab 1b82         [2]     LEAS  2,SP
+  00ad ea81         [3]     ORAB  1,SP
+  00af aa80         [3]     ORAA  0,SP
+  00b1 6c80         [2]     STD   0,SP
+  124:                 
+  125:     ui16_buttons_pressed |= Check_Button(I_Button_Center, BUTTON_CENTER);
+  00b3 c600         [1]     LDAB  #PAGE(IOMap)
+  00b5 5b16         [2]     STAB  /*RPAGE*/22
+  00b7 fc0000       [3]     LDD   IOMap:88
+  00ba 3b           [2]     PSHD  
+  00bb 8601         [1]     LDAA  #1
+  00bd c7           [1]     CLRB  
+  00be 4a000000     [7]     CALL  Check_Button,PAGE(Check_Button)
+  00c2 1b82         [2]     LEAS  2,SP
+  00c4 ea81         [3]     ORAB  1,SP
+  00c6 aa80         [3]     ORAA  0,SP
+  126:     
+  127:  
+  128:     return ui16_buttons_pressed; 
+  129:  }
+  00c8 1b82         [2]     LEAS  2,SP
+  00ca 0a           [7]     RTC   
+  130:  
+  131:  uint16_t Check_Button(uint16_t ui16_button, uint16_t ui16_button_mask)
+  132:  {
+
+Function: Check_Button
+Source  : C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources\User_App.c
+Options : -Cf -CPUHCS12XE -D__MAP_FLASH__ -D__FAR_DATA -Env"GENPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\prm;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\cmd;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Object_Code;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -Env"LIBPATH=C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -EnvOBJPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -EnvTEXTPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -Lasm=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o.lst -Mb -MapFlash -Ot -ObjN=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o -TD4LD4LLD4
+
+  0000 6cac         [2]     STD   4,-SP
+  133:     static uint16_t ui16_buttons = 0;
+  134:     uint16_t ui16_buttons_pressed = 0;
+  0002 186982       [3]     CLRW  2,SP
+  135:     
+  136:     if(ui16_button == INPUT_ON)
+  0005 ec87         [3]     LDD   7,SP
+  0007 04241a       [3]     DBNE  D,*+29 ;abs = 0024
+  137:     {
+  138:  	   if((ui16_buttons & ui16_button_mask) == ui16_button_mask)
+  000a fe0000       [3]     LDX   ui16_buttons
+  000d 18a480       [4]     ANDX  0,SP
+  0010 ae80         [3]     CPX   0,SP
+  0012 2725         [3/1]   BEQ   *+39 ;abs = 0039
+  139:  	   {
+  140:  	      /* Do Nothing button was already processed */
+  141:  	   }
+  142:  	   else
+  143:  	   {
+  144:  		   ui16_buttons         |= ui16_button_mask;
+  0014 fc0000       [3]     LDD   ui16_buttons
+  0017 ea81         [3]     ORAB  1,SP
+  0019 aa80         [3]     ORAA  0,SP
+  001b 7c0000       [3]     STD   ui16_buttons
+  145:  		   ui16_buttons_pressed |= ui16_button_mask;
+  001e ec80         [3]     LDD   0,SP
+  0020 6c82         [2]     STD   2,SP
+  0022 2015         [3]     BRA   *+23 ;abs = 0039
+  146:  	   }
+  147:     }
+  148:     else
+  149:     {   
+  150:  	   if((ui16_buttons & ui16_button_mask) == ui16_button_mask)
+  0024 fe0000       [3]     LDX   ui16_buttons
+  0027 18a480       [4]     ANDX  0,SP
+  002a ae80         [3]     CPX   0,SP
+  002c 260b         [3/1]   BNE   *+13 ;abs = 0039
+  151:  	   {
+  152:  		   ui16_buttons &= ~ui16_button_mask;
+  002e ee80         [3]     LDX   0,SP
+  0030 1841         [2]     COMX  
+  0032 18b40000     [4]     ANDX  ui16_buttons
+  0036 7e0000       [3]     STX   ui16_buttons
+  153:  	   }
+  154:  	   else
+  155:  	   {
+  156:  		   /* Do Nothing button was already cleared */
+  157:  	   }
+  158:     }
+  159:     return ui16_buttons_pressed;
+  0039 ec82         [3]     LDD   2,SP
+  160:  }
+  003b 1b84         [2]     LEAS  4,SP
+  003d 0a           [7]     RTC   
+  161:  
+  162:  /*MAIN SCREEN 1*/
+  163:  void Process_Screen_1(uint16_t ui16_buttons_pressed) 	   
+  164:  {
+
+Function: Process_Screen_1
+Source  : C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources\User_App.c
+Options : -Cf -CPUHCS12XE -D__MAP_FLASH__ -D__FAR_DATA -Env"GENPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\prm;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\cmd;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Object_Code;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -Env"LIBPATH=C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -EnvOBJPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -EnvTEXTPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -Lasm=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o.lst -Mb -MapFlash -Ot -ObjN=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o -TD4LD4LLD4
+
+  0000 3b           [2]     PSHD  
+  165:  	if((ui16_buttons_pressed & BUTTON_01) == BUTTON_01)
+  0001 0f81011e     [4]     BRCLR 1,SP,#1,*+34 ;abs = 0023
+  166:  	{
+  167:  	  if ((vTool1Key == 0) && (vNavKey ==1))
+  0005 c600         [1]     LDAB  #PAGE(IOMap)
+  0007 5b16         [2]     STAB  /*RPAGE*/22
+  0009 fc0000       [3]     LDD   IOMap:394
+  000c 260e         [3/1]   BNE   *+16 ;abs = 001c
+  000e fc0000       [3]     LDD   IOMap:392
+  0011 8c0001       [2]     CPD   #1
+  0014 2606         [3/1]   BNE   *+8 ;abs = 001c
+  168:  	  {
+  169:  	      vTool1Key = 1;
+  0016 7c0000       [3]     STD   IOMap:394
+  170:  	  } 
+  0019 060000       [3]     JMP   Process_Screen_1:0x00e6
+  171:  	  else
+  172:  	  {
+  173:  	      vTool1Key = 0;
+  001c 18790000     [4]     CLRW  IOMap:394
+  0020 060000       [3]     JMP   Process_Screen_1:0x00e6
+  174:  	  } 
+  175:  	}
+  176:  	else if((ui16_buttons_pressed & BUTTON_02) == BUTTON_02)
+  0023 0f810223     [4]     BRCLR 1,SP,#2,*+39 ;abs = 004a
+  177:  	{
+  178:  	  if (qEngineRunning == 1)
+  0027 c600         [1]     LDAB  #PAGE(IOMap)
+  0029 5b16         [2]     STAB  /*RPAGE*/22
+  002b fc0000       [3]     LDD   IOMap:458
+  002e 8c0001       [2]     CPD   #1
+  0031 260a         [3/1]   BNE   *+12 ;abs = 003d
+  179:  	  {
+  180:  	    qDisplayStop = 1;
+  0033 7c0000       [3]     STD   IOMap:462
+  181:  	    qDisplayStart = 0;
+  0036 18790000     [4]     CLRW  IOMap:460
+  182:  	  }
+  003a 060000       [3]     JMP   Process_Screen_1:0x00e6
+  183:  	  else
+  184:  	  {
+  185:  	    qDisplayStop = 0;
+  003d 18790000     [4]     CLRW  IOMap:462
+  186:  	    qDisplayStart = 1;
+  0041 c601         [1]     LDAB  #1
+  0043 87           [1]     CLRA  
+  0044 7c0000       [3]     STD   IOMap:460
+  0047 060000       [3]     JMP   Process_Screen_1:0x00e6
+  187:  	  }
+  188:  	    
+  189:  	}
+  190:  	else if((ui16_buttons_pressed & BUTTON_03) == BUTTON_03)
+  004a 0f81041d     [4]     BRCLR 1,SP,#4,*+33 ;abs = 006b
+  191:  	{
+  192:  		  if ((qIdleSet == 0) && (vNavKey ==1))
+  004e c600         [1]     LDAB  #PAGE(IOMap)
+  0050 5b16         [2]     STAB  /*RPAGE*/22
+  0052 fc0000       [3]     LDD   IOMap:442
+  0055 260e         [3/1]   BNE   *+16 ;abs = 0065
+  0057 fc0000       [3]     LDD   IOMap:392
+  005a 8c0001       [2]     CPD   #1
+  005d 2606         [3/1]   BNE   *+8 ;abs = 0065
+  193:  	  {
+  194:  	      qIdleSet = 1;
+  005f 7c0000       [3]     STD   IOMap:442
+  195:  	  } 
+  0062 060000       [3]     JMP   Process_Screen_1:0x00e6
+  196:  	  else
+  197:  	  {
+  198:  	      qIdleSet = 0;
+  0065 18790000     [4]     CLRW  IOMap:442
+  0069 207b         [3]     BRA   *+125 ;abs = 00e6
+  199:  	  } 
+  200:    }
+  201:  	else if((ui16_buttons_pressed & BUTTON_04) == BUTTON_04)
+  006b 0f81081c     [4]     BRCLR 1,SP,#8,*+32 ;abs = 008b
+  202:  	{
+  203:  		  if ((vTool2Key == 0) && (vNavKey ==1))
+  006f c600         [1]     LDAB  #PAGE(IOMap)
+  0071 5b16         [2]     STAB  /*RPAGE*/22
+  0073 fc0000       [3]     LDD   IOMap:390
+  0076 260d         [3/1]   BNE   *+15 ;abs = 0085
+  0078 fc0000       [3]     LDD   IOMap:392
+  007b 8c0001       [2]     CPD   #1
+  007e 2605         [3/1]   BNE   *+7 ;abs = 0085
+  204:  	  {
+  205:  	      vTool2Key = 1;
+  0080 7c0000       [3]     STD   IOMap:390
+  206:  	  } 
+  0083 2061         [3]     BRA   *+99 ;abs = 00e6
+  207:  	  else
+  208:  	  {
+  209:  	      vTool2Key = 0;
+  0085 18790000     [4]     CLRW  IOMap:390
+  0089 205b         [3]     BRA   *+93 ;abs = 00e6
+  210:  	  } 
+  211:  	}
+  212:  	else if(((ui16_buttons_pressed & BUTTON_LEFT)   == BUTTON_LEFT) && (vNavKey ==1) )		
+  008b 0f81400e     [4]     BRCLR 1,SP,#64,*+18 ;abs = 009d
+  008f c600         [1]     LDAB  #PAGE(IOMap)
+  0091 5b16         [2]     STAB  /*RPAGE*/22
+  0093 fc0000       [3]     LDD   IOMap:392
+  0096 042404       [3]     DBNE  D,*+7 ;abs = 009d
+  213:  	{
+  214:  	   V_Screen_Number = Screen_Screen4;   
+  0099 c604         [1]     LDAB  #4
+  215:  	}
+  009b 2010         [3]     BRA   *+18 ;abs = 00ad
+  216:  	else if(((ui16_buttons_pressed & BUTTON_RIGHT) == BUTTON_RIGHT ) && (vNavKey ==1) )	
+  009d 0f818012     [4]     BRCLR 1,SP,#128,*+22 ;abs = 00b3
+  00a1 c600         [1]     LDAB  #PAGE(IOMap)
+  00a3 5b16         [2]     STAB  /*RPAGE*/22
+  00a5 fc0000       [3]     LDD   IOMap:392
+  00a8 042408       [3]     DBNE  D,*+11 ;abs = 00b3
+  217:  	{       
+  218:  	    V_Screen_Number = Screen_Screen2;                                
+  00ab c602         [1]     LDAB  #2
+  00ad 87           [1]     CLRA  
+  00ae 7c0000       [3]     STD   IOMap:324
+  219:  	}
+  00b1 2033         [3]     BRA   *+53 ;abs = 00e6
+  220:  	else if(((ui16_buttons_pressed & BUTTON_UP) == BUTTON_UP ) && (qIdleSet == 1) && (vIdleMode < 2))	
+  00b3 0f811018     [4]     BRCLR 1,SP,#16,*+28 ;abs = 00cf
+  00b7 c600         [1]     LDAB  #PAGE(IOMap)
+  00b9 5b16         [2]     STAB  /*RPAGE*/22
+  00bb fc0000       [3]     LDD   IOMap:442
+  00be 04240e       [3]     DBNE  D,*+17 ;abs = 00cf
+  00c1 fc0000       [3]     LDD   IOMap:436
+  00c4 8c0002       [2]     CPD   #2
+  00c7 2406         [3/1]   BCC   *+8 ;abs = 00cf
+  221:  	{       
+  222:  	    vIdleMode++;                                
+  00c9 18720000     [5]     INCW  IOMap:436
+  223:  	}
+  00cd 2017         [3]     BRA   *+25 ;abs = 00e6
+  224:  	else if(((ui16_buttons_pressed & BUTTON_DOWN) == BUTTON_DOWN ) && (qIdleSet == 1) && (vIdleMode > 0))	
+  00cf 0f812013     [4]     BRCLR 1,SP,#32,*+23 ;abs = 00e6
+  00d3 c600         [1]     LDAB  #PAGE(IOMap)
+  00d5 5b16         [2]     STAB  /*RPAGE*/22
+  00d7 fc0000       [3]     LDD   IOMap:442
+  00da 042409       [3]     DBNE  D,*+12 ;abs = 00e6
+  00dd fc0000       [3]     LDD   IOMap:436
+  00e0 2704         [3/1]   BEQ   *+6 ;abs = 00e6
+  225:  	{       
+  226:  	    vIdleMode--;                                
+  00e2 18730000     [5]     DECW  IOMap:436
+  227:  	}
+  228:  	
+  229:  	if ((vTool1Key == 1) ||  (vTool2Key == 1) || (qIdleSet ==1))
+  00e6 c600         [1]     LDAB  #PAGE(IOMap)
+  00e8 5b16         [2]     STAB  /*RPAGE*/22
+  00ea fc0000       [3]     LDD   IOMap:394
+  00ed 04040c       [3]     DBEQ  D,*+15 ;abs = 00fc
+  00f0 fc0000       [3]     LDD   IOMap:390
+  00f3 040406       [3]     DBEQ  D,*+9 ;abs = 00fc
+  00f6 fc0000       [3]     LDD   IOMap:442
+  00f9 042409       [3]     DBNE  D,*+12 ;abs = 0105
+  230:    {
+  231:      vNavKey = 0;
+  00fc 18790000     [4]     CLRW  IOMap:392
+  232:      qSetKey = 1;
+  0100 c601         [1]     LDAB  #1
+  0102 87           [1]     CLRA  
+  233:    }
+  0103 2007         [3]     BRA   *+9 ;abs = 010c
+  234:     else
+  235:    {
+  236:      vNavKey = 1;
+  0105 c601         [1]     LDAB  #1
+  0107 87           [1]     CLRA  
+  0108 7c0000       [3]     STD   IOMap:392
+  237:      qSetKey = 0;
+  010b c7           [1]     CLRB  
+  010c 7c0000       [3]     STD   IOMap:448
+  238:    }
+  239:    
+  240:    	if  (I_Button_02 == 0)   /*Reset Engine Start when key is released*/
+  010f fc0000       [3]     LDD   IOMap:74
+  0112 2604         [3/1]   BNE   *+6 ;abs = 0118
+  241:  	{
+  242:  	    qDisplayStart = 0;
+  0114 18790000     [4]     CLRW  IOMap:460
+  243:  	}
+  244:  
+  245:  }
+  0118 1b82         [2]     LEAS  2,SP
+  011a 0a           [7]     RTC   
+  246:  
+  247:  
+  248:  /*ENGINE SCREEN 2*/
+  249:  void Process_Screen_2(uint16_t ui16_buttons_pressed) 	   
+  250:  {
+
+Function: Process_Screen_2
+Source  : C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources\User_App.c
+Options : -Cf -CPUHCS12XE -D__MAP_FLASH__ -D__FAR_DATA -Env"GENPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\prm;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\cmd;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Object_Code;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -Env"LIBPATH=C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -EnvOBJPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -EnvTEXTPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -Lasm=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o.lst -Mb -MapFlash -Ot -ObjN=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o -TD4LD4LLD4
+
+  0000 3b           [2]     PSHD  
+  251:  	if((ui16_buttons_pressed & BUTTON_01) == BUTTON_01)
+  0001 0e81014b     [4]     BRSET 1,SP,#1,*+79 ;abs = 0050
+  252:  	{
+  253:  	}
+  254:  	else if((ui16_buttons_pressed & BUTTON_02) == BUTTON_02)
+  0005 0f81020d     [4]     BRCLR 1,SP,#2,*+17 ;abs = 0016
+  255:  	{
+  256:  	    qRegenReq = 1;
+  0009 c601         [1]     LDAB  #1
+  000b 87           [1]     CLRA  
+  000c 180b000016   [4]     MOVB  #PAGE(IOMap),/*RPAGE*/22
+  0011 7c0000       [3]     STD   IOMap:416
+  257:  	}
+  0014 203a         [3]     BRA   *+60 ;abs = 0050
+  258:  	else if((ui16_buttons_pressed & BUTTON_03) == BUTTON_03)
+  0016 0f810417     [4]     BRCLR 1,SP,#4,*+27 ;abs = 0031
+  259:  	{
+  260:  	    if (qInhibit == 0)
+  001a c600         [1]     LDAB  #PAGE(IOMap)
+  001c 5b16         [2]     STAB  /*RPAGE*/22
+  001e fc0000       [3]     LDD   IOMap:414
+  0021 2608         [3/1]   BNE   *+10 ;abs = 002b
+  261:  	    {
+  262:  	        qInhibit = 1;
+  0023 c601         [1]     LDAB  #1
+  0025 87           [1]     CLRA  
+  0026 7c0000       [3]     STD   IOMap:414
+  263:  	    }
+  0029 2025         [3]     BRA   *+39 ;abs = 0050
+  264:  	    else
+  265:  	    {
+  266:  	      qInhibit = 0;
+  002b 18790000     [4]     CLRW  IOMap:414
+  002f 201f         [3]     BRA   *+33 ;abs = 0050
+  267:  	    }
+  268:    }
+  269:  	else if((ui16_buttons_pressed & BUTTON_04) == BUTTON_04)
+  0031 0e81081b     [4]     BRSET 1,SP,#8,*+31 ;abs = 0050
+  270:  	{
+  271:  	}
+  272:  	else if((ui16_buttons_pressed & BUTTON_CENTER)   == BUTTON_CENTER)		
+  0035 0e800104     [4]     BRSET 0,SP,#1,*+8 ;abs = 003d
+  273:  	{
+  274:  	     V_Screen_Number = Screen_Screen1;
+  275:  	}
+  276:  	else if((ui16_buttons_pressed & BUTTON_LEFT)   == BUTTON_LEFT)		
+  0039 0f814004     [4]     BRCLR 1,SP,#64,*+8 ;abs = 0041
+  277:  	{
+  278:  	   V_Screen_Number = Screen_Screen1;   
+  003d c601         [1]     LDAB  #1
+  003f 2006         [3]     BRA   *+8 ;abs = 0047
+  279:  	}
+  280:  	else if((ui16_buttons_pressed & BUTTON_RIGHT) == BUTTON_RIGHT )
+  0041 0f81800b     [4]     BRCLR 1,SP,#128,*+15 ;abs = 0050
+  281:  	{       
+  282:  	    V_Screen_Number = Screen_Screen3; 
+  0045 c606         [1]     LDAB  #6
+  0047 87           [1]     CLRA  
+  0048 180b000016   [4]     MOVB  #PAGE(IOMap),/*RPAGE*/22
+  004d 7c0000       [3]     STD   IOMap:324
+  283:  	}
+  284:  	
+  285:  	if  (I_Button_02 == 0)   /*Reset Regen Request when key is released*/
+  0050 c600         [1]     LDAB  #PAGE(IOMap)
+  0052 5b16         [2]     STAB  /*RPAGE*/22
+  0054 fc0000       [3]     LDD   IOMap:74
+  0057 2604         [3/1]   BNE   *+6 ;abs = 005d
+  286:  	{
+  287:  	    qRegenReq = 0;
+  0059 18790000     [4]     CLRW  IOMap:416
+  288:  	}
+  289:  }
+  005d 1b82         [2]     LEAS  2,SP
+  005f 0a           [7]     RTC   
+  290:  
+  291:  /*DIAGNOSTICS SCREEN 3*/
+  292:  void Process_Screen_3(uint16_t ui16_buttons_pressed) 	   
+  293:  {
+
+Function: Process_Screen_3
+Source  : C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources\User_App.c
+Options : -Cf -CPUHCS12XE -D__MAP_FLASH__ -D__FAR_DATA -Env"GENPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\prm;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\cmd;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Object_Code;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -Env"LIBPATH=C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -EnvOBJPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -EnvTEXTPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -Lasm=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o.lst -Mb -MapFlash -Ot -ObjN=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o -TD4LD4LLD4
+
+  0000 3b           [2]     PSHD  
+  294:  	if((ui16_buttons_pressed & BUTTON_01) == BUTTON_01)
+  0001 0e81012b     [4]     BRSET 1,SP,#1,*+47 ;abs = 0030
+  295:  	{
+  296:  	}
+  297:  	else if((ui16_buttons_pressed & BUTTON_02) == BUTTON_02)
+  0005 0e810227     [4]     BRSET 1,SP,#2,*+43 ;abs = 0030
+  298:  	{
+  299:  	}
+  300:  	else if((ui16_buttons_pressed & BUTTON_03) == BUTTON_03)
+  0009 0e810423     [4]     BRSET 1,SP,#4,*+39 ;abs = 0030
+  301:  	{
+  302:  	}
+  303:  	else if((ui16_buttons_pressed & BUTTON_04) == BUTTON_04)
+  000d 0e81081f     [4]     BRSET 1,SP,#8,*+35 ;abs = 0030
+  304:  	{
+  305:  	}
+  306:   	else if((ui16_buttons_pressed & BUTTON_CENTER)   == BUTTON_CENTER)		
+  0011 0f800104     [4]     BRCLR 0,SP,#1,*+8 ;abs = 0019
+  307:  	{
+  308:  	     V_Screen_Number = Screen_Screen1;
+  0015 c601         [1]     LDAB  #1
+  309:  	}
+  0017 200e         [3]     BRA   *+16 ;abs = 0027
+  310:  	else if((ui16_buttons_pressed & BUTTON_LEFT)   == BUTTON_LEFT)		
+  0019 0f814004     [4]     BRCLR 1,SP,#64,*+8 ;abs = 0021
+  311:  	{
+  312:  	   V_Screen_Number = Screen_Screen2;   
+  001d c602         [1]     LDAB  #2
+  313:  	}
+  001f 2006         [3]     BRA   *+8 ;abs = 0027
+  314:  	else if((ui16_buttons_pressed & BUTTON_RIGHT) == BUTTON_RIGHT )
+  0021 0f81800b     [4]     BRCLR 1,SP,#128,*+15 ;abs = 0030
+  315:  	{       
+  316:  	    V_Screen_Number = Screen_Screen4; 
+  0025 c604         [1]     LDAB  #4
+  0027 87           [1]     CLRA  
+  0028 180b000016   [4]     MOVB  #PAGE(IOMap),/*RPAGE*/22
+  002d 7c0000       [3]     STD   IOMap:324
+  317:  	}
+  318:  }
+  0030 1b82         [2]     LEAS  2,SP
+  0032 0a           [7]     RTC   
+  319:  
+  320:  /*SERVICE SCREEN 4*/
+  321:  void Process_Screen_4(uint16_t ui16_buttons_pressed) 	   
+  322:  {
+
+Function: Process_Screen_4
+Source  : C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources\User_App.c
+Options : -Cf -CPUHCS12XE -D__MAP_FLASH__ -D__FAR_DATA -Env"GENPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\prm;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\cmd;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Object_Code;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -Env"LIBPATH=C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -EnvOBJPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -EnvTEXTPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -Lasm=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o.lst -Mb -MapFlash -Ot -ObjN=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o -TD4LD4LLD4
+
+  0000 3b           [2]     PSHD  
+  323:  	if((ui16_buttons_pressed & BUTTON_01) == BUTTON_01)
+  0001 0f81011c     [4]     BRCLR 1,SP,#1,*+32 ;abs = 0021
+  324:  	{
+  325:  	   if (As.hr100_reset_timer)
+  0005 c600         [1]     LDAB  #PAGE(As)
+  0007 5b16         [2]     STAB  /*RPAGE*/22
+  0009 fc0000       [3]     LDD   As:28
+  000c 2706         [3/1]   BEQ   *+8 ;abs = 0014
+  326:  	   {
+  327:  	       As.hr100_reset_timer--;
+  000e 18730000     [5]     DECW  As:28
+  328:  	   }
+  0012 2050         [3]     BRA   *+82 ;abs = 0064
+  329:  	   else
+  330:  	   {
+  331:  	      qReset100 = 1;
+  0014 c601         [1]     LDAB  #1
+  0016 87           [1]     CLRA  
+  0017 180b000016   [4]     MOVB  #PAGE(IOMap),/*RPAGE*/22
+  001c 7c0000       [3]     STD   IOMap:470
+  001f 2043         [3]     BRA   *+69 ;abs = 0064
+  332:  	   }
+  333:  	}
+  334:  	else if((ui16_buttons_pressed & BUTTON_02) == BUTTON_02)
+  0021 0e81023f     [4]     BRSET 1,SP,#2,*+67 ;abs = 0064
+  335:  	{
+  336:  	}
+  337:  	else if((ui16_buttons_pressed & BUTTON_03) == BUTTON_03)
+  0025 0e81043b     [4]     BRSET 1,SP,#4,*+63 ;abs = 0064
+  338:  	{
+  339:  	}
+  340:  	else if((ui16_buttons_pressed & BUTTON_04) == BUTTON_04)
+  0029 0f81081c     [4]     BRCLR 1,SP,#8,*+32 ;abs = 0049
+  341:  	{
+  342:  	 if (As.hr250_reset_timer)
+  002d c600         [1]     LDAB  #PAGE(As)
+  002f 5b16         [2]     STAB  /*RPAGE*/22
+  0031 fc0000       [3]     LDD   As:30
+  0034 2706         [3/1]   BEQ   *+8 ;abs = 003c
+  343:  	   {
+  344:  	       As.hr250_reset_timer--;
+  0036 18730000     [5]     DECW  As:30
+  345:  	   }
+  003a 2028         [3]     BRA   *+42 ;abs = 0064
+  346:  	   else
+  347:  	   {
+  348:  	      qReset250 = 1;
+  003c c601         [1]     LDAB  #1
+  003e 87           [1]     CLRA  
+  003f 180b000016   [4]     MOVB  #PAGE(IOMap),/*RPAGE*/22
+  0044 7c0000       [3]     STD   IOMap:472
+  0047 201b         [3]     BRA   *+29 ;abs = 0064
+  349:  	   }
+  350:  	}
+  351:  	else if((ui16_buttons_pressed & BUTTON_CENTER)   == BUTTON_CENTER)		
+  0049 0e80010c     [4]     BRSET 0,SP,#1,*+16 ;abs = 0059
+  352:  	{
+  353:  	     V_Screen_Number = Screen_Screen1;
+  354:  	}
+  355:  	else if((ui16_buttons_pressed & BUTTON_LEFT)   == BUTTON_LEFT)		
+  004d 0f814004     [4]     BRCLR 1,SP,#64,*+8 ;abs = 0055
+  356:  	{
+  357:  	   V_Screen_Number = Screen_Screen3;   
+  0051 c606         [1]     LDAB  #6
+  358:  	}
+  0053 2006         [3]     BRA   *+8 ;abs = 005b
+  359:  	else if((ui16_buttons_pressed & BUTTON_RIGHT) == BUTTON_RIGHT )
+  0055 0f81800b     [4]     BRCLR 1,SP,#128,*+15 ;abs = 0064
+  360:  	{       
+  361:  	    V_Screen_Number = Screen_Screen1; 
+  0059 c601         [1]     LDAB  #1
+  005b 87           [1]     CLRA  
+  005c 180b000016   [4]     MOVB  #PAGE(IOMap),/*RPAGE*/22
+  0061 7c0000       [3]     STD   IOMap:324
+  362:  	}                                          
+  363:  
+  364:  	if  (I_Button_01 == 0)   /*Reset service reset when key is released*/
+  0064 c600         [1]     LDAB  #PAGE(IOMap)
+  0066 5b16         [2]     STAB  /*RPAGE*/22
+  0068 fc0000       [3]     LDD   IOMap:72
+  006b 260f         [3/1]   BNE   *+17 ;abs = 007c
+  365:  	{
+  366:  	    qReset100 = 0;
+  006d 18790000     [4]     CLRW  IOMap:470
+  367:  	    As.hr100_reset_timer = 500;
+  0071 cc01f4       [2]     LDD   #500
+  0074 180b000016   [4]     MOVB  #PAGE(As),/*RPAGE*/22
+  0079 7c0000       [3]     STD   As:28
+  368:  	}
+  369:  	
+  370:  		if  (I_Button_04 == 0)   /*Reset service reset when key is released*/
+  007c c600         [1]     LDAB  #PAGE(IOMap)
+  007e 5b16         [2]     STAB  /*RPAGE*/22
+  0080 fc0000       [3]     LDD   IOMap:78
+  0083 260f         [3/1]   BNE   *+17 ;abs = 0094
+  371:  	{
+  372:  	    qReset250 = 0;
+  0085 18790000     [4]     CLRW  IOMap:472
+  373:  	    As.hr250_reset_timer = 500;
+  0089 cc01f4       [2]     LDD   #500
+  008c 180b000016   [4]     MOVB  #PAGE(As),/*RPAGE*/22
+  0091 7c0000       [3]     STD   As:30
+  374:  	}
+  375:  }
+  0094 1b82         [2]     LEAS  2,SP
+  0096 0a           [7]     RTC   
+  376:  
+  377:  /****************************************        SENSOR SETUP        *********************************************/
+  378:  /*****************************************************************************************************************/
+  379:  
+  380:  
+  381:  void Sensor_Control(void)
+  382:  {
+
+Function: Sensor_Control
+Source  : C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources\User_App.c
+Options : -Cf -CPUHCS12XE -D__MAP_FLASH__ -D__FAR_DATA -Env"GENPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\prm;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\cmd;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Object_Code;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -Env"LIBPATH=C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -EnvOBJPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -EnvTEXTPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -Lasm=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o.lst -Mb -MapFlash -Ot -ObjN=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o -TD4LD4LLD4
+
+  383:  
+  384:  /***************************PRESSURE*************************************/
+  385:  
+  386:   /* Calculate Pump Hydraulic Pressure*/
+  387:  	if ((ai_P_Psi >= 500) && (ai_P_Psi <= 4600))       /*Allow calculation if within normal range*/
+  0000 c600         [1]     LDAB  #PAGE(IOMap)
+  0002 5b16         [2]     STAB  /*RPAGE*/22
+  0004 fc0000       [3]     LDD   IOMap:98
+  0007 6cac         [2]     STD   4,-SP
+  0009 8301f4       [2]     SUBD  #500
+  000c 8c1004       [2]     CPD   #4100
+  000f 224b         [3/1]   BHI   *+77 ;abs = 005c
+  388:  	{
+  389:  	
+  390:  		vPsiP = (short) (0.75*ai_P_Psi - 375);
+  0011 ec80         [3]     LDD   0,SP
+  0013 1887         [2]     CLRX  
+  0015 160000       [4]     JSR   _DUFLOAT
+  0018 3a           [3]     PULD  
+  0019 30           [3]     PULX  
+  001a 31           [3]     PULY  
+  001b 6c82         [2]     STD   2,SP
+  001d 35           [2]     PSHY  
+  001e 34           [2]     PSHX  
+  001f ec86         [3]     LDD   6,SP
+  0021 3b           [2]     PSHD  
+  0022 c7           [1]     CLRB  
+  0023 87           [1]     CLRA  
+  0024 3b           [2]     PSHD  
+  0025 3b           [2]     PSHD  
+  0026 3b           [2]     PSHD  
+  0027 ce3fe8       [2]     LDX   #16360
+  002a 34           [2]     PSHX  
+  002b 160000       [4]     JSR   _DMUL
+  002e 1b88         [2]     LEAS  8,SP
+  0030 3a           [3]     PULD  
+  0031 30           [3]     PULX  
+  0032 31           [3]     PULY  
+  0033 6c82         [2]     STD   2,SP
+  0035 35           [2]     PSHY  
+  0036 34           [2]     PSHX  
+  0037 ec86         [3]     LDD   6,SP
+  0039 3b           [2]     PSHD  
+  003a c7           [1]     CLRB  
+  003b 87           [1]     CLRA  
+  003c 3b           [2]     PSHD  
+  003d 3b           [2]     PSHD  
+  003e 8670         [1]     LDAA  #112
+  0040 3b           [2]     PSHD  
+  0041 cec077       [2]     LDX   #49271
+  0044 34           [2]     PSHX  
+  0045 160000       [4]     JSR   _DADD
+  0048 1b88         [2]     LEAS  8,SP
+  004a 3a           [3]     PULD  
+  004b 30           [3]     PULX  
+  004c 31           [3]     PULY  
+  004d 6c82         [2]     STD   2,SP
+  004f 35           [2]     PSHY  
+  0050 34           [2]     PSHX  
+  0051 ec86         [3]     LDD   6,SP
+  0053 3b           [2]     PSHD  
+  0054 160000       [4]     JSR   _DSTRUNC
+  0057 7c0000       [3]     STD   IOMap:398
+  391:  	
+  392:  		qPSI_P_Fault = FALSE;
+  393:  	}
+  005a 201b         [3]     BRA   *+29 ;abs = 0077
+  394:  	else if (ai_P_Psi > 4600)   /*Set max and fault if highter than normal range*/
+  005c ec80         [3]     LDD   0,SP
+  005e 8c11f8       [2]     CPD   #4600
+  0061 2308         [3/1]   BLS   *+10 ;abs = 006b
+  395:  	{	
+  396:  		vPsiP = 3000;
+  0063 cc0bb8       [2]     LDD   #3000
+  0066 7c0000       [3]     STD   IOMap:398
+  397:  		qPSI_P_Fault = TRUE;
+  398:  	}
+  0069 2016         [3]     BRA   *+24 ;abs = 0081
+  399:  	else if ((ai_P_Psi < 500) && (ai_P_Psi> 450))  /*Set min (0) if slightly under range*/
+  006b 8301c3       [2]     SUBD  #451
+  006e 8c0030       [2]     CPD   #48
+  0071 220a         [3/1]   BHI   *+12 ;abs = 007d
+  400:  		{	
+  401:  		vPsiP = 0;
+  0073 18790000     [4]     CLRW  IOMap:398
+  402:  		qPSI_P_Fault = FALSE;
+  0077 18790000     [4]     CLRW  IOMap:326
+  007b 200a         [3]     BRA   *+12 ;abs = 0087
+  403:  	}
+  404:  	else         /*Set a fault if outside normal range*/
+  405:  	{	
+  406:  		vPsiP = 0;
+  007d 18790000     [4]     CLRW  IOMap:398
+  407:  		qPSI_P_Fault = TRUE;
+  0081 c601         [1]     LDAB  #1
+  0083 87           [1]     CLRA  
+  0084 7c0000       [3]     STD   IOMap:326
+  408:  	}
+  409:  	
+  410:  	/*Set High Hydraulic Pressure Fault*/
+  411:  	
+  412:  	if ((vPsiP >= 2500) && (tonServScreen_VALUE == 0))
+  0087 fc0000       [3]     LDD   IOMap:398
+  008a 8c09c4       [2]     CPD   #2500
+  008d 2516         [3/1]   BCS   *+24 ;abs = 00a5
+  008f fc0000       [3]     LDD   IOMap:584
+  0092 2611         [3/1]   BNE   *+19 ;abs = 00a5
+  413:  	{
+  414:  		qHighHydPSI = TRUE;
+  0094 c601         [1]     LDAB  #1
+  0096 87           [1]     CLRA  
+  0097 7c0000       [3]     STD   IOMap:352
+  415:  		tonHiPSIReset_STATUS = FALSE;
+  009a c7           [1]     CLRB  
+  009b 7c0000       [3]     STD   IOMap:680
+  416:  		tonHiPSIReset_VALUE = 5;
+  009e c605         [1]     LDAB  #5
+  00a0 7c0000       [3]     STD   IOMap:570
+  417:  	} 
+  00a3 200f         [3]     BRA   *+17 ;abs = 00b4
+  418:  	else
+  419:  	{
+  420:  		tonHiPSIReset_STATUS = TRUE;
+  00a5 c601         [1]     LDAB  #1
+  00a7 87           [1]     CLRA  
+  00a8 7c0000       [3]     STD   IOMap:680
+  421:  		if (tonHiPSIReset_VALUE == 0)
+  00ab fe0000       [3]     LDX   IOMap:570
+  00ae 2604         [3/1]   BNE   *+6 ;abs = 00b4
+  422:  		{
+  423:  			qHighHydPSI = FALSE;
+  00b0 c7           [1]     CLRB  
+  00b1 7c0000       [3]     STD   IOMap:352
+  424:  		}
+  425:  	}
+  426:  	
+  427:  	/*Set Low Hydraulic Pressure Fault*/
+  428:  	
+  429:  	if ((vPsiP <= 100) && (vRPM >= 500))
+  00b4 fc0000       [3]     LDD   IOMap:398
+  00b7 8c0064       [2]     CPD   #100
+  00ba 2219         [3/1]   BHI   *+27 ;abs = 00d5
+  00bc fc0000       [3]     LDD   IOMap:320
+  00bf 8c01f4       [2]     CPD   #500
+  00c2 2511         [3/1]   BCS   *+19 ;abs = 00d5
+  430:  	{
+  431:  	    qLowHydPSI = TRUE;
+  00c4 c601         [1]     LDAB  #1
+  00c6 87           [1]     CLRA  
+  00c7 7c0000       [3]     STD   IOMap:402
+  432:  	    tonLoPSIReset_STATUS = FALSE;
+  00ca c7           [1]     CLRB  
+  00cb 7c0000       [3]     STD   IOMap:696
+  433:  		  tonLoPSIReset_VALUE = 5;
+  00ce c605         [1]     LDAB  #5
+  00d0 7c0000       [3]     STD   IOMap:586
+  434:  	} 
+  00d3 200f         [3]     BRA   *+17 ;abs = 00e4
+  435:  	else
+  436:  		{
+  437:  		tonLoPSIReset_STATUS = TRUE;
+  00d5 c601         [1]     LDAB  #1
+  00d7 87           [1]     CLRA  
+  00d8 7c0000       [3]     STD   IOMap:696
+  438:  		if (tonLoPSIReset_VALUE == 0)
+  00db fe0000       [3]     LDX   IOMap:586
+  00de 2604         [3/1]   BNE   *+6 ;abs = 00e4
+  439:  		{
+  440:  			qLowHydPSI = FALSE;
+  00e0 c7           [1]     CLRB  
+  00e1 7c0000       [3]     STD   IOMap:402
+  441:  		}
+  442:  	}
+  443:  	
+  444:  	 /* Calculate Load Sense (LS) Hydraulic Pressure*/
+  445:  	if ((ai_LS_Psi >= 500) && (ai_LS_Psi <= 4600))       /*Allow calculation if within normal range*/
+  00e4 fc0000       [3]     LDD   IOMap:102
+  00e7 6c80         [2]     STD   0,SP
+  00e9 8301f4       [2]     SUBD  #500
+  00ec 8c1004       [2]     CPD   #4100
+  00ef 224b         [3/1]   BHI   *+77 ;abs = 013c
+  446:  	{
+  447:  	
+  448:  		vPsiLS = (short) (0.75*ai_LS_Psi - 375);
+  00f1 ec80         [3]     LDD   0,SP
+  00f3 1887         [2]     CLRX  
+  00f5 160000       [4]     JSR   _DUFLOAT
+  00f8 3a           [3]     PULD  
+  00f9 30           [3]     PULX  
+  00fa 31           [3]     PULY  
+  00fb 6c82         [2]     STD   2,SP
+  00fd 35           [2]     PSHY  
+  00fe 34           [2]     PSHX  
+  00ff ec86         [3]     LDD   6,SP
+  0101 3b           [2]     PSHD  
+  0102 c7           [1]     CLRB  
+  0103 87           [1]     CLRA  
+  0104 3b           [2]     PSHD  
+  0105 3b           [2]     PSHD  
+  0106 3b           [2]     PSHD  
+  0107 ce3fe8       [2]     LDX   #16360
+  010a 34           [2]     PSHX  
+  010b 160000       [4]     JSR   _DMUL
+  010e 1b88         [2]     LEAS  8,SP
+  0110 3a           [3]     PULD  
+  0111 30           [3]     PULX  
+  0112 31           [3]     PULY  
+  0113 6c82         [2]     STD   2,SP
+  0115 35           [2]     PSHY  
+  0116 34           [2]     PSHX  
+  0117 ec86         [3]     LDD   6,SP
+  0119 3b           [2]     PSHD  
+  011a c7           [1]     CLRB  
+  011b 87           [1]     CLRA  
+  011c 3b           [2]     PSHD  
+  011d 3b           [2]     PSHD  
+  011e 8670         [1]     LDAA  #112
+  0120 3b           [2]     PSHD  
+  0121 cec077       [2]     LDX   #49271
+  0124 34           [2]     PSHX  
+  0125 160000       [4]     JSR   _DADD
+  0128 1b88         [2]     LEAS  8,SP
+  012a 3a           [3]     PULD  
+  012b 30           [3]     PULX  
+  012c 31           [3]     PULY  
+  012d 6c82         [2]     STD   2,SP
+  012f 35           [2]     PSHY  
+  0130 34           [2]     PSHX  
+  0131 ec86         [3]     LDD   6,SP
+  0133 3b           [2]     PSHD  
+  0134 160000       [4]     JSR   _DSTRUNC
+  0137 7c0000       [3]     STD   IOMap:400
+  449:  	
+  450:  		qPSI_LS_Fault = FALSE;
+  451:  	}
+  013a 201b         [3]     BRA   *+29 ;abs = 0157
+  452:  	else if (ai_LS_Psi > 4600)   /*Set max and fault if highter than normal range*/
+  013c ec80         [3]     LDD   0,SP
+  013e 8c11f8       [2]     CPD   #4600
+  0141 2308         [3/1]   BLS   *+10 ;abs = 014b
+  453:  	{	
+  454:  		vPsiLS = 3000;
+  0143 cc0bb8       [2]     LDD   #3000
+  0146 7c0000       [3]     STD   IOMap:400
+  455:  		qPSI_LS_Fault = TRUE;
+  456:  	}
+  0149 2016         [3]     BRA   *+24 ;abs = 0161
+  457:  	else if ((ai_LS_Psi < 500) && (ai_LS_Psi> 450))  /*Set min (0) if slightly under range*/
+  014b 8301c3       [2]     SUBD  #451
+  014e 8c0030       [2]     CPD   #48
+  0151 220a         [3/1]   BHI   *+12 ;abs = 015d
+  458:  		{	
+  459:  		vPsiLS = 0;
+  0153 18790000     [4]     CLRW  IOMap:400
+  460:  		qPSI_LS_Fault = FALSE;
+  0157 18790000     [4]     CLRW  IOMap:328
+  015b 200a         [3]     BRA   *+12 ;abs = 0167
+  461:  	}
+  462:  	else         /*Set a fault if outside normal range*/
+  463:  	{	
+  464:  		vPsiLS = 0;
+  015d 18790000     [4]     CLRW  IOMap:400
+  465:  		qPSI_LS_Fault = TRUE;
+  0161 c601         [1]     LDAB  #1
+  0163 87           [1]     CLRA  
+  0164 7c0000       [3]     STD   IOMap:328
+  466:  	}
+  467:  	
+  468:  	/***************************TEMPERATURE*************************************/
+  469:  	
+  470:  		/* Calculate Hydraulic Temp at P port*/
+  471:  				if ((ai_P_Temp >= 1039) && (ai_P_Temp <= 4600))   /*Negative numbers will not be displayed*/
+  0167 fc0000       [3]     LDD   IOMap:100
+  016a 6c80         [2]     STD   0,SP
+  016c 83040f       [2]     SUBD  #1039
+  016f 8c0de9       [2]     CPD   #3561
+  0172 2252         [3/1]   BHI   *+84 ;abs = 01c6
+  472:  				{
+  473:  					vTempP = (short) (0.07425*ai_P_Temp - 77.125);
+  0174 ec80         [3]     LDD   0,SP
+  0176 1887         [2]     CLRX  
+  0178 160000       [4]     JSR   _DUFLOAT
+  017b 3a           [3]     PULD  
+  017c 30           [3]     PULX  
+  017d 31           [3]     PULY  
+  017e 6c82         [2]     STD   2,SP
+  0180 35           [2]     PSHY  
+  0181 34           [2]     PSHX  
+  0182 ec86         [3]     LDD   6,SP
+  0184 3b           [2]     PSHD  
+  0185 cc5e35       [2]     LDD   #24117
+  0188 3b           [2]     PSHD  
+  0189 ce49ba       [2]     LDX   #18874
+  018c 34           [2]     PSHX  
+  018d cd020c       [2]     LDY   #524
+  0190 35           [2]     PSHY  
+  0191 cc3fb3       [2]     LDD   #16307
+  0194 3b           [2]     PSHD  
+  0195 160000       [4]     JSR   _DMUL
+  0198 1b88         [2]     LEAS  8,SP
+  019a 3a           [3]     PULD  
+  019b 30           [3]     PULX  
+  019c 31           [3]     PULY  
+  019d 6c82         [2]     STD   2,SP
+  019f 35           [2]     PSHY  
+  01a0 34           [2]     PSHX  
+  01a1 ec86         [3]     LDD   6,SP
+  01a3 3b           [2]     PSHD  
+  01a4 c7           [1]     CLRB  
+  01a5 87           [1]     CLRA  
+  01a6 3b           [2]     PSHD  
+  01a7 3b           [2]     PSHD  
+  01a8 8648         [1]     LDAA  #72
+  01aa 3b           [2]     PSHD  
+  01ab cec053       [2]     LDX   #49235
+  01ae 34           [2]     PSHX  
+  01af 160000       [4]     JSR   _DADD
+  01b2 1b88         [2]     LEAS  8,SP
+  01b4 3a           [3]     PULD  
+  01b5 30           [3]     PULX  
+  01b6 31           [3]     PULY  
+  01b7 6c82         [2]     STD   2,SP
+  01b9 35           [2]     PSHY  
+  01ba 34           [2]     PSHX  
+  01bb ec86         [3]     LDD   6,SP
+  01bd 3b           [2]     PSHD  
+  01be 160000       [4]     JSR   _DSTRUNC
+  01c1 7c0000       [3]     STD   IOMap:322
+  474:  					qTemp_P_Fault = FALSE;
+  475:  				}
+  01c4 2020         [3]     BRA   *+34 ;abs = 01e6
+  476:  				else if ((ai_P_Temp > 4600))
+  01c6 ec80         [3]     LDD   0,SP
+  01c8 8c11f8       [2]     CPD   #4600
+  01cb 2308         [3/1]   BLS   *+10 ;abs = 01d5
+  477:  				{
+  478:  					vTempP = 257;
+  01cd cc0101       [2]     LDD   #257
+  01d0 7c0000       [3]     STD   IOMap:322
+  479:  					qTemp_P_Fault = TRUE;
+  480:  				}
+  01d3 201b         [3]     BRA   *+29 ;abs = 01f0
+  481:  				else if ((ai_P_Temp < 1039) && (ai_P_Psi> 450))  /*Set min (0) if slightly under range*/
+  01d5 8c040f       [2]     CPD   #1039
+  01d8 2412         [3/1]   BCC   *+20 ;abs = 01ec
+  01da fc0000       [3]     LDD   IOMap:98
+  01dd 8c01c2       [2]     CPD   #450
+  01e0 230a         [3/1]   BLS   *+12 ;abs = 01ec
+  482:  				{	
+  483:  					vTempP = 0;
+  01e2 18790000     [4]     CLRW  IOMap:322
+  484:  					qTemp_P_Fault = FALSE;
+  01e6 18790000     [4]     CLRW  IOMap:330
+  01ea 200a         [3]     BRA   *+12 ;abs = 01f6
+  485:  				}
+  486:  				else
+  487:  				{	
+  488:  					vTempP = 0;
+  01ec 18790000     [4]     CLRW  IOMap:322
+  489:  					qTemp_P_Fault = TRUE;
+  01f0 c601         [1]     LDAB  #1
+  01f2 87           [1]     CLRA  
+  01f3 7c0000       [3]     STD   IOMap:330
+  490:  				}
+  491:  				
+  492:  				/*Set Hyd Over Temperature - */
+  493:  				
+  494:  				if ((vTempP >= 210) && (tonServScreen_VALUE == 0))
+  01f6 fc0000       [3]     LDD   IOMap:322
+  01f9 8c00d2       [2]     CPD   #210
+  01fc 2516         [3/1]   BCS   *+24 ;abs = 0214
+  01fe fc0000       [3]     LDD   IOMap:584
+  0201 2611         [3/1]   BNE   *+19 ;abs = 0214
+  495:  				{
+  496:  					qHighHydTemp = TRUE;
+  0203 c601         [1]     LDAB  #1
+  0205 87           [1]     CLRA  
+  0206 7c0000       [3]     STD   IOMap:350
+  497:  					tonHighTReset_STATUS = FALSE;
+  0209 c7           [1]     CLRB  
+  020a 7c0000       [3]     STD   IOMap:698
+  498:  					tonHighTReset_VALUE = 5;
+  020d c605         [1]     LDAB  #5
+  020f 7c0000       [3]     STD   IOMap:588
+  499:  				}
+  0212 200f         [3]     BRA   *+17 ;abs = 0223
+  500:  				else
+  501:  				{
+  502:  					tonHighTReset_STATUS = TRUE;
+  0214 c601         [1]     LDAB  #1
+  0216 87           [1]     CLRA  
+  0217 7c0000       [3]     STD   IOMap:698
+  503:  					if (tonHighTReset_VALUE == 0)
+  021a fe0000       [3]     LDX   IOMap:588
+  021d 2604         [3/1]   BNE   *+6 ;abs = 0223
+  504:  					{
+  505:  						qHighHydTemp = FALSE;
+  021f c7           [1]     CLRB  
+  0220 7c0000       [3]     STD   IOMap:350
+  506:  					}
+  507:  				}
+  508:  				
+  509:  						/* Calculate Hydraulic Temp at LS port*/
+  510:  				if ((ai_LS_Temp >= 1039) && (ai_LS_Temp <= 4600))   /*Negative numbers will not be displayed*/
+  0223 fc0000       [3]     LDD   IOMap:104
+  0226 6c80         [2]     STD   0,SP
+  0228 83040f       [2]     SUBD  #1039
+  022b 8c0de9       [2]     CPD   #3561
+  022e 2252         [3/1]   BHI   *+84 ;abs = 0282
+  511:  				{
+  512:  					vTempLS = (short) (0.07425*ai_LS_Temp - 77.125);
+  0230 ec80         [3]     LDD   0,SP
+  0232 1887         [2]     CLRX  
+  0234 160000       [4]     JSR   _DUFLOAT
+  0237 3a           [3]     PULD  
+  0238 30           [3]     PULX  
+  0239 31           [3]     PULY  
+  023a 6c82         [2]     STD   2,SP
+  023c 35           [2]     PSHY  
+  023d 34           [2]     PSHX  
+  023e ec86         [3]     LDD   6,SP
+  0240 3b           [2]     PSHD  
+  0241 cc5e35       [2]     LDD   #24117
+  0244 3b           [2]     PSHD  
+  0245 ce49ba       [2]     LDX   #18874
+  0248 34           [2]     PSHX  
+  0249 cd020c       [2]     LDY   #524
+  024c 35           [2]     PSHY  
+  024d cc3fb3       [2]     LDD   #16307
+  0250 3b           [2]     PSHD  
+  0251 160000       [4]     JSR   _DMUL
+  0254 1b88         [2]     LEAS  8,SP
+  0256 3a           [3]     PULD  
+  0257 30           [3]     PULX  
+  0258 31           [3]     PULY  
+  0259 6c82         [2]     STD   2,SP
+  025b 35           [2]     PSHY  
+  025c 34           [2]     PSHX  
+  025d ec86         [3]     LDD   6,SP
+  025f 3b           [2]     PSHD  
+  0260 c7           [1]     CLRB  
+  0261 87           [1]     CLRA  
+  0262 3b           [2]     PSHD  
+  0263 3b           [2]     PSHD  
+  0264 8648         [1]     LDAA  #72
+  0266 3b           [2]     PSHD  
+  0267 cec053       [2]     LDX   #49235
+  026a 34           [2]     PSHX  
+  026b 160000       [4]     JSR   _DADD
+  026e 1b88         [2]     LEAS  8,SP
+  0270 3a           [3]     PULD  
+  0271 30           [3]     PULX  
+  0272 31           [3]     PULY  
+  0273 6c82         [2]     STD   2,SP
+  0275 35           [2]     PSHY  
+  0276 34           [2]     PSHX  
+  0277 ec86         [3]     LDD   6,SP
+  0279 3b           [2]     PSHD  
+  027a 160000       [4]     JSR   _DSTRUNC
+  027d 7c0000       [3]     STD   IOMap:396
+  513:  					qTemp_LS_Fault = FALSE;
+  514:  				}
+  0280 2020         [3]     BRA   *+34 ;abs = 02a2
+  515:  				else if ((ai_LS_Temp > 4600))
+  0282 ec80         [3]     LDD   0,SP
+  0284 8c11f8       [2]     CPD   #4600
+  0287 2308         [3/1]   BLS   *+10 ;abs = 0291
+  516:  				{
+  517:  					vTempLS = 257;
+  0289 cc0101       [2]     LDD   #257
+  028c 7c0000       [3]     STD   IOMap:396
+  518:  					qTemp_LS_Fault = TRUE;
+  519:  				}
+  028f 201b         [3]     BRA   *+29 ;abs = 02ac
+  520:  				else if ((ai_LS_Temp < 1039) && (ai_LS_Psi> 450))  /*Set min (0) if slightly under range*/
+  0291 8c040f       [2]     CPD   #1039
+  0294 2412         [3/1]   BCC   *+20 ;abs = 02a8
+  0296 fc0000       [3]     LDD   IOMap:102
+  0299 8c01c2       [2]     CPD   #450
+  029c 230a         [3/1]   BLS   *+12 ;abs = 02a8
+  521:  				{	
+  522:  					vTempLS = 0;
+  029e 18790000     [4]     CLRW  IOMap:396
+  523:  					qTemp_LS_Fault = FALSE;
+  02a2 18790000     [4]     CLRW  IOMap:332
+  02a6 200a         [3]     BRA   *+12 ;abs = 02b2
+  524:  				}
+  525:  				else
+  526:  				{	
+  527:  					vTempLS = 0;
+  02a8 18790000     [4]     CLRW  IOMap:396
+  528:  					qTemp_LS_Fault = TRUE;
+  02ac c601         [1]     LDAB  #1
+  02ae 87           [1]     CLRA  
+  02af 7c0000       [3]     STD   IOMap:332
+  529:  				}
+  530:  				
+  531:  	/***************************LEVEL*************************************/
+  532:  		
+  533:  	/* Calculate Fuel Level*/
+  534:  		if ((ai_Fuel_Level >= 15) && (ai_Fuel_Level <= 240))
+  02b2 fe0000       [3]     LDX   IOMap
+  02b5 1911         [2]     LEAY  -15,X
+  02b7 8d00e1       [2]     CPY   #225
+  02ba 225d         [3/1]   BHI   *+95 ;abs = 0319
+  535:  		{
+  536:  			vFuelLevel = (short) (115.942-0.48309*ai_Fuel_Level);
+  02bc b754         [1]     TFR   X,D
+  02be 1887         [2]     CLRX  
+  02c0 160000       [4]     JSR   _DUFLOAT
+  02c3 3a           [3]     PULD  
+  02c4 30           [3]     PULX  
+  02c5 31           [3]     PULY  
+  02c6 6c82         [2]     STD   2,SP
+  02c8 35           [2]     PSHY  
+  02c9 34           [2]     PSHX  
+  02ca ec86         [3]     LDD   6,SP
+  02cc 3b           [2]     PSHD  
+  02cd cc93b4       [2]     LDD   #37812
+  02d0 3b           [2]     PSHD  
+  02d1 ce51c1       [2]     LDX   #20929
+  02d4 34           [2]     PSHX  
+  02d5 cdeaf2       [2]     LDY   #60146
+  02d8 35           [2]     PSHY  
+  02d9 cc3fde       [2]     LDD   #16350
+  02dc 3b           [2]     PSHD  
+  02dd 160000       [4]     JSR   _DMUL
+  02e0 1b88         [2]     LEAS  8,SP
+  02e2 3a           [3]     PULD  
+  02e3 30           [3]     PULX  
+  02e4 31           [3]     PULY  
+  02e5 6c82         [2]     STD   2,SP
+  02e7 3a           [3]     PULD  
+  02e8 6c82         [2]     STD   2,SP
+  02ea cc353f       [2]     LDD   #13631
+  02ed 3b           [2]     PSHD  
+  02ee ccba5e       [2]     LDD   #47710
+  02f1 3b           [2]     PSHD  
+  02f2 ccfc49       [2]     LDD   #64585
+  02f5 3b           [2]     PSHD  
+  02f6 cc405c       [2]     LDD   #16476
+  02f9 3b           [2]     PSHD  
+  02fa ec8a         [3]     LDD   10,SP
+  02fc 3b           [2]     PSHD  
+  02fd 35           [2]     PSHY  
+  02fe 34           [2]     PSHX  
+  02ff ec8e         [3]     LDD   14,SP
+  0301 3b           [2]     PSHD  
+  0302 160000       [4]     JSR   _DSUB
+  0305 1b88         [2]     LEAS  8,SP
+  0307 3a           [3]     PULD  
+  0308 30           [3]     PULX  
+  0309 31           [3]     PULY  
+  030a 6c82         [2]     STD   2,SP
+  030c 35           [2]     PSHY  
+  030d 34           [2]     PSHX  
+  030e ec86         [3]     LDD   6,SP
+  0310 3b           [2]     PSHD  
+  0311 160000       [4]     JSR   _DSTRUNC
+  0314 7c0000       [3]     STD   IOMap:406
+  537:  			qFuelFault = FALSE;
+  538:  		}
+  0317 2019         [3]     BRA   *+27 ;abs = 0332
+  539:  		else if (ai_Fuel_Level < 15)
+  0319 8e000f       [2]     CPX   #15
+  031c 2408         [3/1]   BCC   *+10 ;abs = 0326
+  540:  		{
+  541:  			vFuelLevel = 109;
+  031e c66d         [1]     LDAB  #109
+  0320 87           [1]     CLRA  
+  0321 7c0000       [3]     STD   IOMap:406
+  542:  			qFuelFault = TRUE;
+  543:  		}
+  0324 2016         [3]     BRA   *+24 ;abs = 033c
+  544:  		else if ((ai_Fuel_Level > 240) && (ai_Fuel_Level <= 270))
+  0326 1ae10f       [2]     LEAX  -241,X
+  0329 8e001d       [2]     CPX   #29
+  032c 220a         [3/1]   BHI   *+12 ;abs = 0338
+  545:  		{	
+  546:  			vFuelLevel = 0;
+  032e 18790000     [4]     CLRW  IOMap:406
+  547:  			qFuelFault = FALSE;
+  0332 18790000     [4]     CLRW  IOMap:334
+  0336 200a         [3]     BRA   *+12 ;abs = 0342
+  548:  		}
+  549:  		else
+  550:  		{	
+  551:  			vFuelLevel = 0;
+  0338 18790000     [4]     CLRW  IOMap:406
+  552:  			qFuelFault = TRUE;
+  033c c601         [1]     LDAB  #1
+  033e 87           [1]     CLRA  
+  033f 7c0000       [3]     STD   IOMap:334
+  553:  		}
+  554:  		
+  555:  	/*Set Low Fuel Level*/
+  556:  		
+  557:  		if (vFuelLevel <= 10)
+  0342 fc0000       [3]     LDD   IOMap:406
+  0345 8c000a       [2]     CPD   #10
+  0348 220f         [3/1]   BHI   *+17 ;abs = 0359
+  558:  		{
+  559:  			tonLowFuelDebounce_STATUS = TRUE;
+  034a c601         [1]     LDAB  #1
+  034c 87           [1]     CLRA  
+  034d 7c0000       [3]     STD   IOMap:678
+  560:  			if (tonLowFuelDebounce_VALUE == 0)
+  0350 fe0000       [3]     LDX   IOMap:568
+  0353 2601         [3/1]   BNE   *+3 ;abs = 0356
+  561:  			{
+  562:  				qLowFuel = TRUE;
+  563:  			}
+  0355 21           [1]     SKIP1 
+  564:  			else
+  565:  			{
+  566:  				qLowFuel = FALSE;
+  0356 c7           [1]     CLRB  
+  567:  			}
+  568:  		}
+  0357 2010         [3]     BRA   *+18 ;abs = 0369
+  569:  		else if (vFuelLevel >= 15)		
+  0359 8c000f       [2]     CPD   #15
+  035c 250e         [3/1]   BCS   *+16 ;abs = 036c
+  570:  		{
+  571:  			tonLowFuelDebounce_STATUS = FALSE;
+  035e 18790000     [4]     CLRW  IOMap:678
+  572:  			tonLowFuelDebounce_VALUE = 5;
+  0362 c605         [1]     LDAB  #5
+  0364 87           [1]     CLRA  
+  0365 7c0000       [3]     STD   IOMap:568
+  573:  			qLowFuel = FALSE;
+  0368 c7           [1]     CLRB  
+  0369 7c0000       [3]     STD   IOMap:346
+  574:  		}
+  575:  		
+  576:  			/* Calculate Hydraulic Oil Level*/
+  577:  		if ((ai_Hyd_Level >= 15) && (ai_Hyd_Level <= 240))
+  036c fe0000       [3]     LDX   IOMap:2
+  036f 1911         [2]     LEAY  -15,X
+  0371 8d00e1       [2]     CPY   #225
+  0374 225d         [3/1]   BHI   *+95 ;abs = 03d3
+  578:  		{
+  579:  			vHydLevel = (short) (115.942-0.48309*ai_Hyd_Level);
+  0376 b754         [1]     TFR   X,D
+  0378 1887         [2]     CLRX  
+  037a 160000       [4]     JSR   _DUFLOAT
+  037d 3a           [3]     PULD  
+  037e 30           [3]     PULX  
+  037f 31           [3]     PULY  
+  0380 6c82         [2]     STD   2,SP
+  0382 35           [2]     PSHY  
+  0383 34           [2]     PSHX  
+  0384 ec86         [3]     LDD   6,SP
+  0386 3b           [2]     PSHD  
+  0387 cc93b4       [2]     LDD   #37812
+  038a 3b           [2]     PSHD  
+  038b ce51c1       [2]     LDX   #20929
+  038e 34           [2]     PSHX  
+  038f cdeaf2       [2]     LDY   #60146
+  0392 35           [2]     PSHY  
+  0393 cc3fde       [2]     LDD   #16350
+  0396 3b           [2]     PSHD  
+  0397 160000       [4]     JSR   _DMUL
+  039a 1b88         [2]     LEAS  8,SP
+  039c 3a           [3]     PULD  
+  039d 30           [3]     PULX  
+  039e 31           [3]     PULY  
+  039f 6c82         [2]     STD   2,SP
+  03a1 3a           [3]     PULD  
+  03a2 6c82         [2]     STD   2,SP
+  03a4 cc353f       [2]     LDD   #13631
+  03a7 3b           [2]     PSHD  
+  03a8 ccba5e       [2]     LDD   #47710
+  03ab 3b           [2]     PSHD  
+  03ac ccfc49       [2]     LDD   #64585
+  03af 3b           [2]     PSHD  
+  03b0 cc405c       [2]     LDD   #16476
+  03b3 3b           [2]     PSHD  
+  03b4 ec8a         [3]     LDD   10,SP
+  03b6 3b           [2]     PSHD  
+  03b7 35           [2]     PSHY  
+  03b8 34           [2]     PSHX  
+  03b9 ec8e         [3]     LDD   14,SP
+  03bb 3b           [2]     PSHD  
+  03bc 160000       [4]     JSR   _DSUB
+  03bf 1b88         [2]     LEAS  8,SP
+  03c1 3a           [3]     PULD  
+  03c2 30           [3]     PULX  
+  03c3 31           [3]     PULY  
+  03c4 6c82         [2]     STD   2,SP
+  03c6 35           [2]     PSHY  
+  03c7 34           [2]     PSHX  
+  03c8 ec86         [3]     LDD   6,SP
+  03ca 3b           [2]     PSHD  
+  03cb 160000       [4]     JSR   _DSTRUNC
+  03ce 7c0000       [3]     STD   IOMap:408
+  580:  			qHydLevelFault = FALSE;
+  581:  		}
+  03d1 2019         [3]     BRA   *+27 ;abs = 03ec
+  582:  		else if (ai_Hyd_Level < 15)
+  03d3 8e000f       [2]     CPX   #15
+  03d6 2408         [3/1]   BCC   *+10 ;abs = 03e0
+  583:  		{
+  584:  			vHydLevel = 109;
+  03d8 c66d         [1]     LDAB  #109
+  03da 87           [1]     CLRA  
+  03db 7c0000       [3]     STD   IOMap:408
+  585:  			qHydLevelFault = TRUE;
+  586:  		}
+  03de 2016         [3]     BRA   *+24 ;abs = 03f6
+  587:  		else if ((ai_Hyd_Level > 240) && (ai_Hyd_Level <= 270))
+  03e0 1ae10f       [2]     LEAX  -241,X
+  03e3 8e001d       [2]     CPX   #29
+  03e6 220a         [3/1]   BHI   *+12 ;abs = 03f2
+  588:  		{	
+  589:  			vHydLevel = 0;
+  03e8 18790000     [4]     CLRW  IOMap:408
+  590:  			qHydLevelFault = FALSE;
+  03ec 18790000     [4]     CLRW  IOMap:336
+  03f0 200a         [3]     BRA   *+12 ;abs = 03fc
+  591:  		}
+  592:  		else
+  593:  		{	
+  594:  			vHydLevel = 0;
+  03f2 18790000     [4]     CLRW  IOMap:408
+  595:  			qHydLevelFault = TRUE;
+  03f6 c601         [1]     LDAB  #1
+  03f8 87           [1]     CLRA  
+  03f9 7c0000       [3]     STD   IOMap:336
+  596:  		}
+  597:  		
+  598:  	/*Set Low Hydraulic Oil Level*/
+  599:  		
+  600:  		if (vHydLevel <= 30)
+  03fc fc0000       [3]     LDD   IOMap:408
+  03ff 8c001e       [2]     CPD   #30
+  0402 220f         [3/1]   BHI   *+17 ;abs = 0413
+  601:  		{
+  602:  			tonHydLevDebounce_STATUS = TRUE;
+  0404 c601         [1]     LDAB  #1
+  0406 87           [1]     CLRA  
+  0407 7c0000       [3]     STD   IOMap:682
+  603:  			if (tonHydLevDebounce_VALUE == 0)
+  040a fe0000       [3]     LDX   IOMap:572
+  040d 2613         [3/1]   BNE   *+21 ;abs = 0422
+  604:  			{
+  605:  				qLowHydOil = TRUE;
+  606:  			}
+  040f 2012         [3]     BRA   *+20 ;abs = 0423
+  0411 200f         [3]     BRA   *+17 ;abs = 0422
+  607:  			else
+  608:  			{
+  609:  				qLowHydOil = FALSE;
+  610:  			}
+  611:  		}
+  612:  		else if (vHydLevel >= 35)		
+  0413 8c0023       [2]     CPD   #35
+  0416 250e         [3/1]   BCS   *+16 ;abs = 0426
+  613:  		{
+  614:  			tonHydLevDebounce_STATUS = FALSE;
+  0418 18790000     [4]     CLRW  IOMap:682
+  615:  			tonHydLevDebounce_VALUE = 5;
+  041c c605         [1]     LDAB  #5
+  041e 87           [1]     CLRA  
+  041f 7c0000       [3]     STD   IOMap:572
+  616:  			qLowHydOil = FALSE;
+  0422 c7           [1]     CLRB  
+  0423 7c0000       [3]     STD   IOMap:348
+  617:  		}
+  618:  }
+  0426 1b84         [2]     LEAS  4,SP
+  0428 0a           [7]     RTC   
+  619:  
+  620:  
+  621:  /*************************************          RADIO CONTROL        ********************************************/
+  622:  /****************************************************************************************************************/  
+  623:    
+  624:  
+  625:  void Radio_Control (void)
+  626:  {
+
+Function: Radio_Control
+Source  : C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources\User_App.c
+Options : -Cf -CPUHCS12XE -D__MAP_FLASH__ -D__FAR_DATA -Env"GENPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\prm;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\cmd;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Object_Code;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -Env"LIBPATH=C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -EnvOBJPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -EnvTEXTPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -Lasm=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o.lst -Mb -MapFlash -Ot -ObjN=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o -TD4LD4LLD4
+
+  627:  //#define CAN_Key1_1_Start_VALUE           IOMap[110]      /*Range 0 - 250*/
+  628:  //#define CAN_Key1_2_Stop_VALUE            IOMap[111]      /*Range 0 - 250*/
+  629:  //#define CAN_Key1_3_Up_VALUE              IOMap[112]      /*Range 0 - 250*/
+  630:  //#define CAN_Key1_4_Dn_VALUE              IOMap[113]      /*Range 0 - 250*/
+  631:  //#define CAN_Key2_1_Start_VALUE           IOMap[114]      /*Range 0 - 250*/
+  632:  //#define CAN_Key2_2_Stop_VALUE            IOMap[115]      /*Range 0 - 250*/
+  633:  //#define CAN_Key2_3_Up_VALUE              IOMap[116]      /*Range 0 - 250*/
+  634:  //#define CAN_Key2_4_Dn_VALUE              IOMap[117]      /*Range 0 - 250*/
+  635:  //#define CAN_RC1_Data_VALUE               IOMap[122]      /*Range 0 - 3*/
+  636:  //#define CAN_RC1_Estop_VALUE              IOMap[123]      /*Range 0 - 3*/
+  637:  //#define CAN_RC1_Start_VALUE              IOMap[124]      /*Range 0 - 3*/
+  638:  //#define CAN_RC2_Data_VALUE               IOMap[125]      /*Range 0 - 3*/
+  639:  //#define CAN_RC2_Estop_VALUE              IOMap[126]      /*Range 0 - 3*/
+  640:  //#define CAN_RC2_Start_VALUE              IOMap[127]      /*Range 0 - 3*/
+  641:  
+  642:  
+  643:    /*****************RADIO CONTROL TOOL 1******************/
+  644:    
+  645:    
+  646:    /*RC ACTIVE AND ESTOP*/
+  647:    if  ((CAN_RC1_Data_VALUE == 1) &&  (CAN_RC1_Estop_VALUE == 1)  &&  (CAN_RC1_Start_VALUE == 1))
+  0000 c600         [1]     LDAB  #PAGE(IOMap)
+  0002 5b16         [2]     STAB  /*RPAGE*/22
+  0004 fc0000       [3]     LDD   IOMap:244
+  0007 042415       [3]     DBNE  D,*+24 ;abs = 001f
+  000a fc0000       [3]     LDD   IOMap:246
+  000d 04240f       [3]     DBNE  D,*+18 ;abs = 001f
+  0010 fc0000       [3]     LDD   IOMap:248
+  0013 8c0001       [2]     CPD   #1
+  0016 2607         [3/1]   BNE   *+9 ;abs = 001f
+  648:    {
+  649:      qRC1Active = 1;
+  0018 7c0000       [3]     STD   IOMap:376
+  650:      qRC1Estop = 0;
+  001b 18790000     [4]     CLRW  IOMap:380
+  651:    }
+  652:    
+  653:    if ((qRC1Active == 1) && ((CAN_RC1_Data_VALUE == 0)||(CAN_RC1_Estop_VALUE == 0)))
+  001f fc0000       [3]     LDD   IOMap:376
+  0022 042413       [3]     DBNE  D,*+22 ;abs = 0038
+  0025 fc0000       [3]     LDD   IOMap:244
+  0028 2705         [3/1]   BEQ   *+7 ;abs = 002f
+  002a fc0000       [3]     LDD   IOMap:246
+  002d 2609         [3/1]   BNE   *+11 ;abs = 0038
+  654:    {
+  655:      qRC1Active = 1;
+  002f c601         [1]     LDAB  #1
+  0031 87           [1]     CLRA  
+  0032 7c0000       [3]     STD   IOMap:376
+  656:      qRC1Estop = 1;
+  0035 7c0000       [3]     STD   IOMap:380
+  657:    }
+  658:    
+  659:    if ((CAN_Key1_1_Start_VALUE >= 50) && (CAN_RC1_Data_VALUE == 1))         /*START*/
+  0038 fc0000       [3]     LDD   IOMap:220
+  003b 8c0032       [2]     CPD   #50
+  003e 250d         [3/1]   BCS   *+15 ;abs = 004d
+  0040 fc0000       [3]     LDD   IOMap:244
+  0043 8c0001       [2]     CPD   #1
+  0046 2605         [3/1]   BNE   *+7 ;abs = 004d
+  660:    {
+  661:      qRC1Start = 1;
+  0048 7c0000       [3]     STD   IOMap:418
+  662:    }
+  004b 2004         [3]     BRA   *+6 ;abs = 0051
+  663:    else
+  664:    {
+  665:      qRC1Start = 0;
+  004d 18790000     [4]     CLRW  IOMap:418
+  666:    }                                                                                                                               
+  667:      
+  668:    if ((CAN_Key1_2_Stop_VALUE >= 50) && (CAN_RC1_Data_VALUE == 1))          /*STOP*/
+  0051 fc0000       [3]     LDD   IOMap:222
+  0054 8c0032       [2]     CPD   #50
+  0057 250d         [3/1]   BCS   *+15 ;abs = 0066
+  0059 fc0000       [3]     LDD   IOMap:244
+  005c 8c0001       [2]     CPD   #1
+  005f 2605         [3/1]   BNE   *+7 ;abs = 0066
+  669:    {
+  670:      qRC1Stop = 1;
+  0061 7c0000       [3]     STD   IOMap:420
+  671:    }
+  0064 2004         [3]     BRA   *+6 ;abs = 006a
+  672:    else
+  673:    {
+  674:      qRC1Stop = 0;
+  0066 18790000     [4]     CLRW  IOMap:420
+  675:    }
+  676:    
+  677:    if ((CAN_Key1_3_Up_VALUE >= 50) && (CAN_RC1_Data_VALUE == 1))            /*UP*/
+  006a fc0000       [3]     LDD   IOMap:224
+  006d 8c0032       [2]     CPD   #50
+  0070 250d         [3/1]   BCS   *+15 ;abs = 007f
+  0072 fc0000       [3]     LDD   IOMap:244
+  0075 8c0001       [2]     CPD   #1
+  0078 2605         [3/1]   BNE   *+7 ;abs = 007f
+  678:    {
+  679:      qRC1Up = 1;
+  007a 7c0000       [3]     STD   IOMap:422
+  680:    }
+  007d 2004         [3]     BRA   *+6 ;abs = 0083
+  681:    else
+  682:    {
+  683:      qRC1Up = 0;
+  007f 18790000     [4]     CLRW  IOMap:422
+  684:    }
+  685:    
+  686:    if ((CAN_Key1_4_Dn_VALUE >= 50) && (CAN_RC1_Data_VALUE == 1))            /*DOWN*/
+  0083 fc0000       [3]     LDD   IOMap:226
+  0086 8c0032       [2]     CPD   #50
+  0089 250d         [3/1]   BCS   *+15 ;abs = 0098
+  008b fc0000       [3]     LDD   IOMap:244
+  008e 8c0001       [2]     CPD   #1
+  0091 2605         [3/1]   BNE   *+7 ;abs = 0098
+  687:    {
+  688:      qRC1Down = 1;
+  0093 7c0000       [3]     STD   IOMap:424
+  689:    }
+  0096 2004         [3]     BRA   *+6 ;abs = 009c
+  690:    else
+  691:    {
+  692:      qRC1Down = 0;
+  0098 18790000     [4]     CLRW  IOMap:424
+  693:    }
+  694:    
+  695:     /*****************RADIO CONTROL TOOL 2******************/
+  696:    
+  697:    
+  698:    /*RC ACTIVE AND ESTOP*/
+  699:    
+  700:    if  ((CAN_RC2_Data_VALUE == 1) &&  (CAN_RC2_Estop_VALUE == 1)  &&  (CAN_RC2_Start_VALUE == 1))
+  009c fc0000       [3]     LDD   IOMap:250
+  009f 042415       [3]     DBNE  D,*+24 ;abs = 00b7
+  00a2 fc0000       [3]     LDD   IOMap:252
+  00a5 04240f       [3]     DBNE  D,*+18 ;abs = 00b7
+  00a8 fc0000       [3]     LDD   IOMap:254
+  00ab 8c0001       [2]     CPD   #1
+  00ae 2607         [3/1]   BNE   *+9 ;abs = 00b7
+  701:    {
+  702:      qRC2Active = 1;
+  00b0 7c0000       [3]     STD   IOMap:378
+  703:      qRC2Estop = 0;
+  00b3 18790000     [4]     CLRW  IOMap:382
+  704:    }
+  705:    
+  706:    if ((qRC2Active == 1) && ((CAN_RC2_Data_VALUE == 0)||(CAN_RC2_Estop_VALUE == 0)))
+  00b7 fc0000       [3]     LDD   IOMap:378
+  00ba 042413       [3]     DBNE  D,*+22 ;abs = 00d0
+  00bd fc0000       [3]     LDD   IOMap:250
+  00c0 2705         [3/1]   BEQ   *+7 ;abs = 00c7
+  00c2 fc0000       [3]     LDD   IOMap:252
+  00c5 2609         [3/1]   BNE   *+11 ;abs = 00d0
+  707:    {
+  708:      qRC2Active = 1;
+  00c7 c601         [1]     LDAB  #1
+  00c9 87           [1]     CLRA  
+  00ca 7c0000       [3]     STD   IOMap:378
+  709:      qRC2Estop = 1;
+  00cd 7c0000       [3]     STD   IOMap:382
+  710:    }
+  711:    
+  712:    if ((CAN_Key2_1_Start_VALUE >= 50) && (CAN_RC2_Data_VALUE == 1))      /*START*/
+  00d0 fc0000       [3]     LDD   IOMap:228
+  00d3 8c0032       [2]     CPD   #50
+  00d6 250d         [3/1]   BCS   *+15 ;abs = 00e5
+  00d8 fc0000       [3]     LDD   IOMap:250
+  00db 8c0001       [2]     CPD   #1
+  00de 2605         [3/1]   BNE   *+7 ;abs = 00e5
+  713:    {
+  714:      qRC2Start = 1;
+  00e0 7c0000       [3]     STD   IOMap:426
+  715:    }
+  00e3 2004         [3]     BRA   *+6 ;abs = 00e9
+  716:    else
+  717:    {
+  718:      qRC2Start = 0;
+  00e5 18790000     [4]     CLRW  IOMap:426
+  719:    }
+  720:      
+  721:    if ((CAN_Key2_2_Stop_VALUE >= 50) && (CAN_RC2_Data_VALUE == 1))  /*STOP*/
+  00e9 fc0000       [3]     LDD   IOMap:230
+  00ec 8c0032       [2]     CPD   #50
+  00ef 250d         [3/1]   BCS   *+15 ;abs = 00fe
+  00f1 fc0000       [3]     LDD   IOMap:250
+  00f4 8c0001       [2]     CPD   #1
+  00f7 2605         [3/1]   BNE   *+7 ;abs = 00fe
+  722:    {
+  723:         
+  724:      qRC2Stop = 1;
+  00f9 7c0000       [3]     STD   IOMap:428
+  725:    }
+  00fc 2004         [3]     BRA   *+6 ;abs = 0102
+  726:    else
+  727:    {
+  728:      qRC2Stop = 0;
+  00fe 18790000     [4]     CLRW  IOMap:428
+  729:    }
+  730:    
+  731:    if ((CAN_Key2_3_Up_VALUE >= 50) && (CAN_RC2_Data_VALUE == 1))         /*UP*/
+  0102 fc0000       [3]     LDD   IOMap:232
+  0105 8c0032       [2]     CPD   #50
+  0108 250d         [3/1]   BCS   *+15 ;abs = 0117
+  010a fc0000       [3]     LDD   IOMap:250
+  010d 8c0001       [2]     CPD   #1
+  0110 2605         [3/1]   BNE   *+7 ;abs = 0117
+  732:    {
+  733:      qRC2Up = 1;
+  0112 7c0000       [3]     STD   IOMap:430
+  734:    }
+  0115 2004         [3]     BRA   *+6 ;abs = 011b
+  735:    else
+  736:    {
+  737:      qRC2Up = 0;
+  0117 18790000     [4]     CLRW  IOMap:430
+  738:    }
+  739:    
+  740:    if ((CAN_Key2_4_Dn_VALUE >= 50) && (CAN_RC2_Data_VALUE == 1))          /*DOWN*/
+  011b fc0000       [3]     LDD   IOMap:234
+  011e 8c0032       [2]     CPD   #50
+  0121 250c         [3/1]   BCS   *+14 ;abs = 012f
+  0123 fc0000       [3]     LDD   IOMap:250
+  0126 8c0001       [2]     CPD   #1
+  0129 2604         [3/1]   BNE   *+6 ;abs = 012f
+  741:    {
+  742:      qRC2Down = 1;
+  012b 7c0000       [3]     STD   IOMap:432
+  743:    }
+  012e 0a           [7]     RTC   
+  744:    else
+  745:    {
+  746:      qRC2Down = 0;
+  012f 18790000     [4]     CLRW  IOMap:432
+  747:    }
+  748:  
+  749:  
+  750:  }
+  0133 0a           [7]     RTC   
+  751:  
+  752:  /***************************************           ENGINE        ************************************************/
+  753:  /****************************************************************************************************************/
+  754:  
+  755:  
+  756:  void Engine_Control (void)
+  757:  {
+
+Function: Engine_Control
+Source  : C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources\User_App.c
+Options : -Cf -CPUHCS12XE -D__MAP_FLASH__ -D__FAR_DATA -Env"GENPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\prm;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\cmd;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Object_Code;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -Env"LIBPATH=C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -EnvOBJPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -EnvTEXTPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -Lasm=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o.lst -Mb -MapFlash -Ot -ObjN=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o -TD4LD4LLD4
+
+  0000 1b9d         [2]     LEAS  -3,SP
+  758:      
+  759:    /*Calculate Engine Water Temp*/ 
+  760:      
+  761:      
+  762:      if (CAN_CoolT_VALUE  >=40)         /*Gauge starts at 0,so any negative values will show 0*/
+  0002 c600         [1]     LDAB  #PAGE(IOMap)
+  0004 5b16         [2]     STAB  /*RPAGE*/22
+  0006 fc0000       [3]     LDD   IOMap:242
+  0009 8c0028       [2]     CPD   #40
+  000c 254c         [3/1]   BCS   *+78 ;abs = 005a
+  763:      {
+  764:         vWaterT = (short) (((CAN_CoolT_VALUE - 40) *1.8)+32);
+  000e 830028       [2]     SUBD  #40
+  0011 1887         [2]     CLRX  
+  0013 160000       [4]     JSR   _DUFLOAT
+  0016 3a           [3]     PULD  
+  0017 30           [3]     PULX  
+  0018 31           [3]     PULY  
+  0019 6c83         [2]     STD   3,SP
+  001b 35           [2]     PSHY  
+  001c 34           [2]     PSHX  
+  001d ec87         [3]     LDD   7,SP
+  001f 3b           [2]     PSHD  
+  0020 cccccd       [2]     LDD   #52429
+  0023 3b           [2]     PSHD  
+  0024 53           [1]     DECB  
+  0025 3b           [2]     PSHD  
+  0026 3b           [2]     PSHD  
+  0027 ce3ffc       [2]     LDX   #16380
+  002a 34           [2]     PSHX  
+  002b 160000       [4]     JSR   _DMUL
+  002e 1b88         [2]     LEAS  8,SP
+  0030 3a           [3]     PULD  
+  0031 30           [3]     PULX  
+  0032 31           [3]     PULY  
+  0033 6c83         [2]     STD   3,SP
+  0035 35           [2]     PSHY  
+  0036 34           [2]     PSHX  
+  0037 ec87         [3]     LDD   7,SP
+  0039 3b           [2]     PSHD  
+  003a c7           [1]     CLRB  
+  003b 87           [1]     CLRA  
+  003c 3b           [2]     PSHD  
+  003d 3b           [2]     PSHD  
+  003e 3b           [2]     PSHD  
+  003f ce4040       [2]     LDX   #16448
+  0042 34           [2]     PSHX  
+  0043 160000       [4]     JSR   _DADD
+  0046 1b88         [2]     LEAS  8,SP
+  0048 3a           [3]     PULD  
+  0049 30           [3]     PULX  
+  004a 31           [3]     PULY  
+  004b 6c83         [2]     STD   3,SP
+  004d 35           [2]     PSHY  
+  004e 34           [2]     PSHX  
+  004f ec87         [3]     LDD   7,SP
+  0051 3b           [2]     PSHD  
+  0052 160000       [4]     JSR   _DSTRUNC
+  0055 7c0000       [3]     STD   IOMap:410
+  765:      } 
+  0058 2004         [3]     BRA   *+6 ;abs = 005e
+  766:      else
+  767:      {
+  768:         vWaterT = 0;
+  005a 18790000     [4]     CLRW  IOMap:410
+  769:      }
+  770:      
+  771:      
+  772:      /*Calculate Engine RPM and set Engine Running*/ 
+  773:      
+  774:      vRPM = (short) (CAN_RPM_VALUE * 0.125);
+  005e fc0000       [3]     LDD   IOMap:240
+  0061 1887         [2]     CLRX  
+  0063 160000       [4]     JSR   _DUFLOAT
+  0066 3a           [3]     PULD  
+  0067 30           [3]     PULX  
+  0068 31           [3]     PULY  
+  0069 6c83         [2]     STD   3,SP
+  006b 35           [2]     PSHY  
+  006c 34           [2]     PSHX  
+  006d ec87         [3]     LDD   7,SP
+  006f 3b           [2]     PSHD  
+  0070 c7           [1]     CLRB  
+  0071 87           [1]     CLRA  
+  0072 3b           [2]     PSHD  
+  0073 3b           [2]     PSHD  
+  0074 3b           [2]     PSHD  
+  0075 ce3fc0       [2]     LDX   #16320
+  0078 34           [2]     PSHX  
+  0079 160000       [4]     JSR   _DMUL
+  007c 1b88         [2]     LEAS  8,SP
+  007e 3a           [3]     PULD  
+  007f 30           [3]     PULX  
+  0080 31           [3]     PULY  
+  0081 6c83         [2]     STD   3,SP
+  0083 35           [2]     PSHY  
+  0084 34           [2]     PSHX  
+  0085 ec87         [3]     LDD   7,SP
+  0087 3b           [2]     PSHD  
+  0088 160000       [4]     JSR   _DSTRUNC
+  008b 7c0000       [3]     STD   IOMap:320
+  775:      if (vRPM >= 500)
+  008e 8c01f4       [2]     CPD   #500
+  0091 2508         [3/1]   BCS   *+10 ;abs = 009b
+  776:      {
+  777:         qEngineRunning = 1;
+  0093 c601         [1]     LDAB  #1
+  0095 87           [1]     CLRA  
+  0096 7c0000       [3]     STD   IOMap:458
+  778:      }
+  0099 2004         [3]     BRA   *+6 ;abs = 009f
+  779:      else
+  780:      {
+  781:         qEngineRunning = 0;
+  009b 18790000     [4]     CLRW  IOMap:458
+  782:      }
+  783:                                                              
+  784:      
+  785:      /*Set Idle Modes*/
+  786:      
+  787:        switch(vIdleMode)
+  009f fc0000       [3]     LDD   IOMap:436
+  00a2 160000       [4]     JSR   _CASE_CHECKED_BYTE
+  00a5 03           DC.B  3
+  00a6 13           DC.B  19
+  00a7 03           DC.B  3
+  00a8 13           DC.B  19
+  00a9 0b           DC.B  11
+  788:        {
+  789:          case 0:                        /*Automatic Mode - High idle if load sense pressure*/
+  790:             if (vPsiLS > 25)
+  00aa fc0000       [3]     LDD   IOMap:400
+  00ad 8c0019       [2]     CPD   #25
+  00b0 2308         [3/1]   BLS   *+10 ;abs = 00ba
+  791:              {
+  792:                qHighIdle = 1;
+  793:              }
+  794:              else
+  795:              {
+  796:                qHighIdle = 0;
+  797:              }
+  798:      	   break;
+  799:          case 1:                       /*Manual Low Idle*/
+  800:              qHighIdle = 0;	   
+  801:      	   break;
+  802:          case 2:                       /*Manual High Idle*/
+  803:            qHighIdle = 1;	   
+  00b2 c601         [1]     LDAB  #1
+  00b4 87           [1]     CLRA  
+  00b5 7c0000       [3]     STD   IOMap:438
+  00b8 2004         [3]     BRA   *+6 ;abs = 00be
+  804:      	   break;
+  805:          default:
+  806:      	    qHighIdle = 0;
+  00ba 18790000     [4]     CLRW  IOMap:438
+  807:      	   break;
+  808:        }
+  809:        
+  810:        if (qHighIdle == 1)     /*Set engine speed request to engine, 1/8 RPM/bit*/
+  00be fc0000       [3]     LDD   IOMap:438
+  00c1 042405       [3]     DBNE  D,*+8 ;abs = 00c9
+  811:        {
+  812:          vReqEngSpeed = 1500*8;
+  00c4 cc2ee0       [2]     LDD   #12000
+  813:        }
+  00c7 2003         [3]     BRA   *+5 ;abs = 00cc
+  814:        else
+  815:        {
+  816:          vReqEngSpeed = 750*8;
+  00c9 cc1770       [2]     LDD   #6000
+  00cc 7c0000       [3]     STD   IOMap:434
+  817:        }
+  818:        
+  819:        
+  820:        
+  821:        /*Calulate Fault Codes*/
+  822:        
+  823:        
+  824:        vSPN_Display = (CAN_SPN_Least16_VALUE + (CAN_SPN_Most3_VALUE << 16)) ;
+  00cf ce0000       [2]     LDX   #GLOBAL(IOMap:212)
+  00d2 c600         [1]     LDAB  #GLOBAL_PAGE(IOMap)
+  00d4 5b10         [2]     STAB  /*GPAGE*/16
+  00d6 b756         [1]     TFR   X,Y
+  00d8 18ec42       [4]     GLDD  2,Y
+  00db 18c7         [2]     CLRY  
+  00dd ce0000       [2]     LDX   #GLOBAL(IOMap:208)
+  00e0 3b           [2]     PSHD  
+  00e1 c600         [1]     LDAB  #GLOBAL_PAGE(IOMap)
+  00e3 5b10         [2]     STAB  /*GPAGE*/16
+  00e5 18ec00       [4]     GLDD  0,X
+  00e8 6c83         [2]     STD   3,SP
+  00ea 18ec02       [4]     GLDD  2,X
+  00ed 3b           [2]     PSHD  
+  00ee ee85         [3]     LDX   5,SP
+  00f0 34           [2]     PSHX  
+  00f1 b764         [1]     TFR   Y,D
+  00f3 ee84         [3]     LDX   4,SP
+  00f5 160000       [4]     JSR   _LADD
+  00f8 cd0000       [2]     LDY   #GLOBAL(IOMap:450)
+  00fb 6c80         [2]     STD   0,SP
+  00fd c600         [1]     LDAB  #GLOBAL_PAGE(IOMap)
+  00ff 5b10         [2]     STAB  /*GPAGE*/16
+  0101 186e40       [3]     GSTX  0,Y
+  0104 30           [3]     PULX  
+  0105 186e42       [3]     GSTX  2,Y
+  825:        vFMI_Display = (short) CAN_FMI_VALUE;
+  0108 ce0000       [2]     LDX   #GLOBAL(IOMap:216)
+  010b c600         [1]     LDAB  #GLOBAL_PAGE(IOMap)
+  010d 5b10         [2]     STAB  /*GPAGE*/16
+  010f 18ed02       [4]     GLDY  2,X
+  0112 7d0000       [3]     STY   IOMap:454
+  826:        
+  827:        
+  828:        /*Start/Stop*/
+  829:        
+  830:        if ((qRC1Stop == 1) || (qRC2Stop == 1) || (qRC1Estop == 1) || (qRC2Estop == 1) || (qDisplayStop == 1))
+  0115 fc0000       [3]     LDD   IOMap:420
+  0118 04041c       [3]     DBEQ  D,*+31 ;abs = 0137
+  011b fc0000       [3]     LDD   IOMap:428
+  011e 040416       [3]     DBEQ  D,*+25 ;abs = 0137
+  0121 fc0000       [3]     LDD   IOMap:380
+  0124 8c0001       [2]     CPD   #1
+  0127 270e         [3/1]   BEQ   *+16 ;abs = 0137
+  0129 fe0000       [3]     LDX   IOMap:382
+  012c 8e0001       [2]     CPX   #1
+  012f 2706         [3/1]   BEQ   *+8 ;abs = 0137
+  0131 fd0000       [3]     LDY   IOMap:462
+  0134 042608       [3]     DBNE  Y,*+11 ;abs = 013f
+  831:        {
+  832:          qEngineStop = 1;
+  0137 c601         [1]     LDAB  #1
+  0139 87           [1]     CLRA  
+  013a 7c0000       [3]     STD   IOMap:456
+  833:          Update_Output (doStart   , OUTPUT_OFF);
+  834:          
+  835:        }
+  013d 202b         [3]     BRA   *+45 ;abs = 016a
+  836:        else if (((qRC1Estop == 0) && (qRC2Estop == 0)) &&
+  013f 046424       [3]     TBNE  D,*+39 ;abs = 0166
+  0142 046521       [3]     TBNE  X,*+36 ;abs = 0166
+  837:        ((qRC1Start == 1) || (qRC2Start == 1) || (qDisplayStart == 1)))
+  0145 fc0000       [3]     LDD   IOMap:418
+  0148 04040c       [3]     DBEQ  D,*+15 ;abs = 0157
+  014b fc0000       [3]     LDD   IOMap:426
+  014e 040406       [3]     DBEQ  D,*+9 ;abs = 0157
+  0151 fc0000       [3]     LDD   IOMap:460
+  0154 04240f       [3]     DBNE  D,*+18 ;abs = 0166
+  838:        {
+  839:           qEngineStop = 0;
+  0157 18790000     [4]     CLRW  IOMap:456
+  840:           Update_Output (doStart   , OUTPUT_ON);  
+  015b c7           [1]     CLRB  
+  015c 37           [2]     PSHB  
+  015d 52           [1]     INCB  
+  015e 37           [2]     PSHB  
+  015f cc03e8       [2]     LDD   #1000
+  0162 3b           [2]     PSHD  
+  0163 c7           [1]     CLRB  
+  841:        }
+  0164 200b         [3]     BRA   *+13 ;abs = 0171
+  842:        else
+  843:        {
+  844:           qEngineStop = 0;
+  0166 18790000     [4]     CLRW  IOMap:456
+  845:           Update_Output (doStart   , OUTPUT_OFF);
+  016a c7           [1]     CLRB  
+  016b 37           [2]     PSHB  
+  016c 52           [1]     INCB  
+  016d 37           [2]     PSHB  
+  016e c7           [1]     CLRB  
+  016f 87           [1]     CLRA  
+  0170 3b           [2]     PSHD  
+  0171 4a000000     [7]     CALL  Update_Output,PAGE(Update_Output)
+  0175 1b84         [2]     LEAS  4,SP
+  846:        }
+  847:        
+  848:        /*Engine Hours and Service Hours*/
+  849:        
+  850:        vEngHours = (long) (CAN_EngHours_VALUE * 0.5);   /* Eng hours in 1/10 hour*/
+  0177 ce0000       [2]     LDX   #GLOBAL(IOMap:204)
+  017a c600         [1]     LDAB  #GLOBAL_PAGE(IOMap)
+  017c 5b10         [2]     STAB  /*GPAGE*/16
+  017e b756         [1]     TFR   X,Y
+  0180 18ee00       [4]     GLDX  0,X
+  0183 18ec42       [4]     GLDD  2,Y
+  0186 160000       [4]     JSR   _DUFLOAT
+  0189 3a           [3]     PULD  
+  018a 30           [3]     PULX  
+  018b 31           [3]     PULY  
+  018c 6c83         [2]     STD   3,SP
+  018e 35           [2]     PSHY  
+  018f 34           [2]     PSHX  
+  0190 ec87         [3]     LDD   7,SP
+  0192 3b           [2]     PSHD  
+  0193 1887         [2]     CLRX  
+  0195 34           [2]     PSHX  
+  0196 34           [2]     PSHX  
+  0197 34           [2]     PSHX  
+  0198 cc3fe0       [2]     LDD   #16352
+  019b 3b           [2]     PSHD  
+  019c 160000       [4]     JSR   _DMUL
+  019f 1b88         [2]     LEAS  8,SP
+  01a1 3a           [3]     PULD  
+  01a2 30           [3]     PULX  
+  01a3 31           [3]     PULY  
+  01a4 6c83         [2]     STD   3,SP
+  01a6 35           [2]     PSHY  
+  01a7 34           [2]     PSHX  
+  01a8 ec87         [3]     LDD   7,SP
+  01aa 3b           [2]     PSHD  
+  01ab 160000       [4]     JSR   _DSTRUNC
+  01ae cd0000       [2]     LDY   #GLOBAL(IOMap:474)
+  01b1 3b           [2]     PSHD  
+  01b2 c600         [1]     LDAB  #GLOBAL_PAGE(IOMap)
+  01b4 5b10         [2]     STAB  /*GPAGE*/16
+  01b6 186e40       [3]     GSTX  0,Y
+  01b9 30           [3]     PULX  
+  01ba 186e42       [3]     GSTX  2,Y
+  851:        
+  852:        if (qReset100)
+  01bd 8600         [1]     LDAA  #PAGE(IOMap)
+  01bf 5a16         [2]     STAA  /*RPAGE*/22
+  01c1 fe0000       [3]     LDX   IOMap:470
+  01c4 2729         [3/1]   BEQ   *+43 ;abs = 01ef
+  853:        {
+  854:           ee100HR =  (vEngHours + 1000); /* Eng hours in 1/10 hour*/
+  01c6 5b10         [2]     STAB  /*GPAGE*/16
+  01c8 18ec40       [4]     GLDD  0,Y
+  01cb 18ee42       [4]     GLDX  2,Y
+  01ce 34           [2]     PSHX  
+  01cf 3b           [2]     PSHD  
+  01d0 cc03e8       [2]     LDD   #1000
+  01d3 1887         [2]     CLRX  
+  01d5 160000       [4]     JSR   _LADD
+  01d8 cd0000       [2]     LDY   #GLOBAL(IOMap:478)
+  01db 3b           [2]     PSHD  
+  01dc c600         [1]     LDAB  #GLOBAL_PAGE(IOMap)
+  01de 5b10         [2]     STAB  /*GPAGE*/16
+  01e0 186e40       [3]     GSTX  0,Y
+  01e3 30           [3]     PULX  
+  01e4 186e42       [3]     GSTX  2,Y
+  855:           qReset100 = 0;
+  01e7 c7           [1]     CLRB  
+  01e8 87           [1]     CLRA  
+  01e9 7c0000       [3]     STD   IOMap:470
+  856:           qService100 = 0;
+  01ec 7c0000       [3]     STD   IOMap:466
+  857:        }
+  858:        
+  859:        if (qReset250)
+  01ef fc0000       [3]     LDD   IOMap:472
+  01f2 272e         [3/1]   BEQ   *+48 ;abs = 0222
+  860:        {
+  861:           ee250HR =  (vEngHours + 2500);  /* Eng hours in 1/10 hour*/
+  01f4 ce0000       [2]     LDX   #GLOBAL(IOMap:474)
+  01f7 c600         [1]     LDAB  #GLOBAL_PAGE(IOMap)
+  01f9 5b10         [2]     STAB  /*GPAGE*/16
+  01fb 18ed00       [4]     GLDY  0,X
+  01fe 18ec02       [4]     GLDD  2,X
+  0201 3b           [2]     PSHD  
+  0202 35           [2]     PSHY  
+  0203 cc09c4       [2]     LDD   #2500
+  0206 1887         [2]     CLRX  
+  0208 160000       [4]     JSR   _LADD
+  020b cd0000       [2]     LDY   #GLOBAL(IOMap:482)
+  020e 3b           [2]     PSHD  
+  020f c600         [1]     LDAB  #GLOBAL_PAGE(IOMap)
+  0211 5b10         [2]     STAB  /*GPAGE*/16
+  0213 186e40       [3]     GSTX  0,Y
+  0216 30           [3]     PULX  
+  0217 186e42       [3]     GSTX  2,Y
+  862:           qReset250 = 0;
+  021a c7           [1]     CLRB  
+  021b 87           [1]     CLRA  
+  021c 7c0000       [3]     STD   IOMap:472
+  863:           qService250 = 0;
+  021f 7c0000       [3]     STD   IOMap:468
+  864:        }
+  865:        
+  866:        if  (vEngHours > ee100HR)
+  0222 ce0000       [2]     LDX   #GLOBAL(IOMap:474)
+  0225 c600         [1]     LDAB  #GLOBAL_PAGE(IOMap)
+  0227 cd0000       [2]     LDY   #GLOBAL(IOMap:478)
+  022a 8600         [1]     LDAA  #GLOBAL_PAGE(IOMap)
+  022c 5a10         [2]     STAA  /*GPAGE*/16
+  022e 6b80         [2]     STAB  0,SP
+  0230 18ec40       [4]     GLDD  0,Y
+  0233 6c81         [2]     STD   1,SP
+  0235 18ec42       [4]     GLDD  2,Y
+  0238 3b           [2]     PSHD  
+  0239 ed83         [3]     LDY   3,SP
+  023b 35           [2]     PSHY  
+  023c e684         [3]     LDAB  4,SP
+  023e 5b10         [2]     STAB  /*GPAGE*/16
+  0240 b756         [1]     TFR   X,Y
+  0242 18ee00       [4]     GLDX  0,X
+  0245 18ec42       [4]     GLDD  2,Y
+  0248 160000       [4]     JSR   _LCMP
+  024b 2306         [3/1]   BLS   *+8 ;abs = 0253
+  867:        {
+  868:          qService100 = 1;
+  024d c601         [1]     LDAB  #1
+  024f 87           [1]     CLRA  
+  0250 7c0000       [3]     STD   IOMap:466
+  869:        }
+  870:        
+  871:        if  (vEngHours > ee250HR)
+  0253 ce0000       [2]     LDX   #GLOBAL(IOMap:474)
+  0256 c600         [1]     LDAB  #GLOBAL_PAGE(IOMap)
+  0258 cd0000       [2]     LDY   #GLOBAL(IOMap:482)
+  025b 8600         [1]     LDAA  #GLOBAL_PAGE(IOMap)
+  025d 5a10         [2]     STAA  /*GPAGE*/16
+  025f 6b80         [2]     STAB  0,SP
+  0261 18ec40       [4]     GLDD  0,Y
+  0264 6c81         [2]     STD   1,SP
+  0266 18ec42       [4]     GLDD  2,Y
+  0269 3b           [2]     PSHD  
+  026a ed83         [3]     LDY   3,SP
+  026c 35           [2]     PSHY  
+  026d e684         [3]     LDAB  4,SP
+  026f 5b10         [2]     STAB  /*GPAGE*/16
+  0271 b756         [1]     TFR   X,Y
+  0273 18ee00       [4]     GLDX  0,X
+  0276 18ec42       [4]     GLDD  2,Y
+  0279 160000       [4]     JSR   _LCMP
+  027c 2306         [3/1]   BLS   *+8 ;abs = 0284
+  872:        {
+  873:          qService250 = 1;
+  027e c601         [1]     LDAB  #1
+  0280 87           [1]     CLRA  
+  0281 7c0000       [3]     STD   IOMap:468
+  874:        }
+  875:        
+  876:        
+  877:        
+  878:     
+  879:        
+  880:        
+  881:  }     
+  0284 1b83         [2]     LEAS  3,SP
+  0286 0a           [7]     RTC   
+  882:  
+  883:  
+  884:  /***************************************        FLOW CONTROL       **********************************************/
+  885:  /****************************************************************************************************************/
+  886:  		
+  887:  void Flow_Control (void)
+  888:  {
+
+Function: Flow_Control
+Source  : C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources\User_App.c
+Options : -Cf -CPUHCS12XE -D__MAP_FLASH__ -D__FAR_DATA -Env"GENPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\prm;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\cmd;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Sources;C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\Object_Code;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\lib;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\src;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -Env"LIBPATH=C:\Program Files (x86)\Freescale\CWS12v5.1\lib\HC12c\include;C:\Program Files (x86)\Freescale\CWS12v5.1\lib\xgatec\include" -EnvOBJPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -EnvTEXTPATH=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\bin -Lasm=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o.lst -Mb -MapFlash -Ot -ObjN=C:\Users\wills00\Documents\Projects\Hippo\CCPU\Software\Hippo_CCPU_01_01\CL71110610_0210\CI002117-S-405_Data\Standard\ObjectCode\User_App.c.o -TD4LD4LLD4
+
+  889:  
+  890:      /*Timer for INC/DEC when buttons are held*/
+  891:      tonFlowIncDec_STATUS=TRUE;
+  0000 c601         [1]     LDAB  #1
+  0002 87           [1]     CLRA  
+  0003 180b000016   [4]     MOVB  #PAGE(IOMap),/*RPAGE*/22
+  0008 7c0000       [3]     STD   IOMap:688
+  892:         
+  893:      
+  894:      /***************Tool Circuit 1*******************/    
+  895:     
+  896:        if (
+  000b bc0000       [3]     CPD   IOMap:84
+  000e 260c         [3/1]   BNE   *+14 ;abs = 001c
+  897:          (((I_Button_Up==TRUE) && (V_Screen_Number == Screen_Screen1) && (vTool1Key == 1))|| (qRC1Up == 1)) 
+  0010 fe0000       [3]     LDX   IOMap:324
+  0013 042506       [3]     DBNE  X,*+9 ;abs = 001c
+  0016 fe0000       [3]     LDX   IOMap:394
+  0019 040506       [3]     DBEQ  X,*+9 ;abs = 0022
+  001c fe0000       [3]     LDX   IOMap:422
+  001f 04251b       [3]     DBNE  X,*+30 ;abs = 003d
+  898:          && (qUp1shot == 0) && (I_Button_Down==FALSE))
+  0022 fe0000       [3]     LDX   IOMap:372
+  0025 2616         [3/1]   BNE   *+24 ;abs = 003d
+  0027 fe0000       [3]     LDX   IOMap:86
+  002a 2611         [3/1]   BNE   *+19 ;abs = 003d
+  899:        {
+  900:           if (vFlow1 < 300)
+  002c fe0000       [3]     LDX   IOMap:368
+  002f 8e012c       [2]     CPX   #300
+  0032 2404         [3/1]   BCC   *+6 ;abs = 0038
+  901:           {
+  902:            vFlow1++ ;
+  0034 18720000     [5]     INCW  IOMap:368
+  903:           }
+  904:           qUp1shot =1;
+  0038 7c0000       [3]     STD   IOMap:372
+  905:        }
+  003b 2054         [3]     BRA   *+86 ;abs = 0091
+  906:        else if (
+  003d fe0000       [3]     LDX   IOMap:84
+  0040 04250c       [3]     DBNE  X,*+15 ;abs = 004f
+  907:        (((I_Button_Up==TRUE) && (V_Screen_Number == Screen_Screen1) && (vTool1Key == 1))|| (qRC1Up == 1))
+  0043 fe0000       [3]     LDX   IOMap:324
+  0046 042506       [3]     DBNE  X,*+9 ;abs = 004f
+  0049 fe0000       [3]     LDX   IOMap:394
+  004c 040506       [3]     DBEQ  X,*+9 ;abs = 0055
+  004f fe0000       [3]     LDX   IOMap:422
+  0052 04252e       [3]     DBNE  X,*+49 ;abs = 0083
+  908:        && (I_Button_Down==FALSE))
+  0055 fe0000       [3]     LDX   IOMap:86
+  0058 2629         [3/1]   BNE   *+43 ;abs = 0083
+  909:        {
+  910:           if (As.flow1UpDeb > 0)
+  005a c600         [1]     LDAB  #PAGE(As)
+  005c 5b16         [2]     STAB  /*RPAGE*/22
+  005e fe0000       [3]     LDX   As:10
+  0061 2704         [3/1]   BEQ   *+6 ;abs = 0067
+  911:           {
+  912:               As.flow1UpDeb-- ;
+  0063 18730000     [5]     DECW  As:10
+  913:           }
+  914:           if ((As.flow1UpDeb == 0) &&  (tonFlowIncDec_VALUE ==0))
+  0067 fc0000       [3]     LDD   As:10
+  006a 2625         [3/1]   BNE   *+39 ;abs = 0091
+  006c c600         [1]     LDAB  #PAGE(IOMap)
+  006e 5b16         [2]     STAB  /*RPAGE*/22
+  0070 fc0000       [3]     LDD   IOMap:578
+  0073 261c         [3/1]   BNE   *+30 ;abs = 0091
+  915:           {
+  916:              if (vFlow1 < 300)
+  0075 fc0000       [3]     LDD   IOMap:368
+  0078 8c012c       [2]     CPD   #300
+  007b 2414         [3/1]   BCC   *+22 ;abs = 0091
+  917:              {
+  918:                vFlow1++ ;
+  007d 18720000     [5]     INCW  IOMap:368
+  0081 200e         [3]     BRA   *+16 ;abs = 0091
+  919:              }
+  920:           }
+  921:         }
+  922:         else
+  923:         {
+  924:          qUp1shot = 0;
+  0083 c7           [1]     CLRB  
+  0084 7c0000       [3]     STD   IOMap:372
+  925:          As.flow1UpDeb = 80;
+  0087 c650         [1]     LDAB  #80
+  0089 180b000016   [4]     MOVB  #PAGE(As),/*RPAGE*/22
+  008e 7c0000       [3]     STD   As:10
+  926:         }
+  927:         
+  928:        if (
+  0091 c600         [1]     LDAB  #PAGE(IOMap)
+  0093 5b16         [2]     STAB  /*RPAGE*/22
+  0095 fc0000       [3]     LDD   IOMap:86
+  0098 04240c       [3]     DBNE  D,*+15 ;abs = 00a7
+  929:          (((I_Button_Down==TRUE) && (V_Screen_Number == Screen_Screen1) && (vTool1Key == 1)) || (qRC1Down == 1)) 
+  009b fc0000       [3]     LDD   IOMap:324
+  009e 042406       [3]     DBNE  D,*+9 ;abs = 00a7
+  00a1 fc0000       [3]     LDD   IOMap:394
+  00a4 040406       [3]     DBEQ  D,*+9 ;abs = 00ad
+  00a7 fc0000       [3]     LDD   IOMap:424
+  00aa 042416       [3]     DBNE  D,*+25 ;abs = 00c3
+  930:           && (qDown1Shot == 0))
+  00ad fc0000       [3]     LDD   IOMap:374
+  00b0 2611         [3/1]   BNE   *+19 ;abs = 00c3
+  931:        {
+  932:           if (vFlow1 > 0)
+  00b2 fc0000       [3]     LDD   IOMap:368
+  00b5 2704         [3/1]   BEQ   *+6 ;abs = 00bb
+  933:           {
+  934:            vFlow1-- ;
+  00b7 18730000     [5]     DECW  IOMap:368
+  935:           }
+  936:           qDown1Shot =1;
+  00bb c601         [1]     LDAB  #1
+  00bd 87           [1]     CLRA  
+  00be 7c0000       [3]     STD   IOMap:374
+  937:        }
+  00c1 204d         [3]     BRA   *+79 ;abs = 0110
+  938:        else if  (((I_Button_Down==TRUE) && (V_Screen_Number == Screen_Screen1) && (vTool1Key == 1)) || (qRC1Down == 1)) 
+  00c3 fc0000       [3]     LDD   IOMap:86
+  00c6 04240c       [3]     DBNE  D,*+15 ;abs = 00d5
+  00c9 fc0000       [3]     LDD   IOMap:324
+  00cc 042406       [3]     DBNE  D,*+9 ;abs = 00d5
+  00cf fc0000       [3]     LDD   IOMap:394
+  00d2 040406       [3]     DBEQ  D,*+9 ;abs = 00db
+  00d5 fc0000       [3]     LDD   IOMap:424
+  00d8 042426       [3]     DBNE  D,*+41 ;abs = 0101
+  939:        {
+  940:           if (As.flow1DnDeb > 0)
+  00db c600         [1]     LDAB  #PAGE(As)
+  00dd 5b16         [2]     STAB  /*RPAGE*/22
+  00df fc0000       [3]     LDD   As:12
+  00e2 2704         [3/1]   BEQ   *+6 ;abs = 00e8
+  941:           {
+  942:               As.flow1DnDeb-- ;
+  00e4 18730000     [5]     DECW  As:12
+  943:           }
+  944:           if ((As.flow1DnDeb == 0) &&  (tonFlowIncDec_VALUE ==0))
+  00e8 fc0000       [3]     LDD   As:12
+  00eb 2623         [3/1]   BNE   *+37 ;abs = 0110
+  00ed c600         [1]     LDAB  #PAGE(IOMap)
+  00ef 5b16         [2]     STAB  /*RPAGE*/22
+  00f1 fc0000       [3]     LDD   IOMap:578
+  00f4 261a         [3/1]   BNE   *+28 ;abs = 0110
+  945:           {
+  946:              if (vFlow1 > 0)
+  00f6 fc0000       [3]     LDD   IOMap:368
+  00f9 2715         [3/1]   BEQ   *+23 ;abs = 0110
+  947:              {
+  948:                vFlow1-- ;
+  00fb 18730000     [5]     DECW  IOMap:368
+  00ff 200f         [3]     BRA   *+17 ;abs = 0110
+  949:              }
+  950:           }
+  951:         }
+  952:         else
+  953:         {
+  954:          qDown1Shot = 0;
+  0101 18790000     [4]     CLRW  IOMap:374
+  955:          As.flow1DnDeb = 80;
+  0105 c650         [1]     LDAB  #80
+  0107 87           [1]     CLRA  
+  0108 180b000016   [4]     MOVB  #PAGE(As),/*RPAGE*/22
+  010d 7c0000       [3]     STD   As:12
+  956:         }
+  957:         
+  958:          /***************Tool Circuit 2*******************/    
+  959:     
+  960:        if (
+  0110 c600         [1]     LDAB  #PAGE(IOMap)
+  0112 5b16         [2]     STAB  /*RPAGE*/22
+  0114 fc0000       [3]     LDD   IOMap:84
+  0117 04240c       [3]     DBNE  D,*+15 ;abs = 0126
+  961:          (((I_Button_Up==TRUE) && (V_Screen_Number == Screen_Screen1) && (vTool2Key == 1))|| (qRC2Up == 1)) 
+  011a fc0000       [3]     LDD   IOMap:324
+  011d 042406       [3]     DBNE  D,*+9 ;abs = 0126
+  0120 fc0000       [3]     LDD   IOMap:390
+  0123 040406       [3]     DBEQ  D,*+9 ;abs = 012c
+  0126 fc0000       [3]     LDD   IOMap:430
+  0129 04241e       [3]     DBNE  D,*+33 ;abs = 014a
+  962:          && (qUp1Shot2 == 0) && (I_Button_Down==FALSE))
+  012c fc0000       [3]     LDD   IOMap:444
+  012f 2619         [3/1]   BNE   *+27 ;abs = 014a
+  0131 fc0000       [3]     LDD   IOMap:86
+  0134 2614         [3/1]   BNE   *+22 ;abs = 014a
+  963:        {
+  964:           if (vFlow2 < 300)
+  0136 fc0000       [3]     LDD   IOMap:370
+  0139 8c012c       [2]     CPD   #300
+  013c 2404         [3/1]   BCC   *+6 ;abs = 0142
+  965:           {
+  966:            vFlow2++ ;
+  013e 18720000     [5]     INCW  IOMap:370
+  967:           }
+  968:           qUp1Shot2 =1;
+  0142 c601         [1]     LDAB  #1
+  0144 87           [1]     CLRA  
+  0145 7c0000       [3]     STD   IOMap:444
+  969:        }
+  0148 2055         [3]     BRA   *+87 ;abs = 019f
+  970:        else if (
+  014a fc0000       [3]     LDD   IOMap:84
+  014d 04240c       [3]     DBNE  D,*+15 ;abs = 015c
+  971:        (((I_Button_Up==TRUE) && (V_Screen_Number == Screen_Screen1) && (vTool2Key == 1))|| (qRC2Up == 1))
+  0150 fc0000       [3]     LDD   IOMap:324
+  0153 042406       [3]     DBNE  D,*+9 ;abs = 015c
+  0156 fc0000       [3]     LDD   IOMap:390
+  0159 040406       [3]     DBEQ  D,*+9 ;abs = 0162
+  015c fc0000       [3]     LDD   IOMap:430
+  015f 04242e       [3]     DBNE  D,*+49 ;abs = 0190
+  972:        && (I_Button_Down==FALSE))
+  0162 fc0000       [3]     LDD   IOMap:86
+  0165 2629         [3/1]   BNE   *+43 ;abs = 0190
+  973:        {
+  974:           if (As.flow2UpDeb > 0)
+  0167 c600         [1]     LDAB  #PAGE(As)
+  0169 5b16         [2]     STAB  /*RPAGE*/22
+  016b fc0000       [3]     LDD   As:14
+  016e 2704         [3/1]   BEQ   *+6 ;abs = 0174
+  975:           {
+  976:               As.flow2UpDeb-- ;
+  0170 18730000     [5]     DECW  As:14
+  977:           }
+  978:           if ((As.flow2UpDeb == 0) &&  (tonFlowIncDec_VALUE ==0))
+  0174 fc0000       [3]     LDD   As:14
+  0177 2626         [3/1]   BNE   *+40 ;abs = 019f
+  0179 c600         [1]     LDAB  #PAGE(IOMap)
+  017b 5b16         [2]     STAB  /*RPAGE*/22
+  017d fc0000       [3]     LDD   IOMap:578
+  0180 261d         [3/1]   BNE   *+31 ;abs = 019f
+  979:           {
+  980:              if (vFlow2 < 300)
+  0182 fc0000       [3]     LDD   IOMap:370
+  0185 8c012c       [2]     CPD   #300
+  0188 2415         [3/1]   BCC   *+23 ;abs = 019f
+  981:              {
+  982:                vFlow2++ ;
+  018a 18720000     [5]     INCW  IOMap:370
+  018e 200f         [3]     BRA   *+17 ;abs = 019f
+  983:              }
+  984:           }
+  985:         }
+  986:         else
+  987:         {
+  988:          qUp1Shot2 = 0;
+  0190 18790000     [4]     CLRW  IOMap:444
+  989:          As.flow2UpDeb = 80;
+  0194 c650         [1]     LDAB  #80
+  0196 87           [1]     CLRA  
+  0197 180b000016   [4]     MOVB  #PAGE(As),/*RPAGE*/22
+  019c 7c0000       [3]     STD   As:14
+  990:         }
+  991:         
+  992:        if (
+  019f c600         [1]     LDAB  #PAGE(IOMap)
+  01a1 5b16         [2]     STAB  /*RPAGE*/22
+  01a3 fc0000       [3]     LDD   IOMap:86
+  01a6 04240c       [3]     DBNE  D,*+15 ;abs = 01b5
+  993:          (((I_Button_Down==TRUE) && (V_Screen_Number == Screen_Screen1) && (vTool2Key == 1)) || (qRC2Down == 1)) 
+  01a9 fc0000       [3]     LDD   IOMap:324
+  01ac 042406       [3]     DBNE  D,*+9 ;abs = 01b5
+  01af fc0000       [3]     LDD   IOMap:390
+  01b2 040406       [3]     DBEQ  D,*+9 ;abs = 01bb
+  01b5 fc0000       [3]     LDD   IOMap:432
+  01b8 042416       [3]     DBNE  D,*+25 ;abs = 01d1
+  994:           && (qDown1Shot2 == 0))
+  01bb fc0000       [3]     LDD   IOMap:446
+  01be 2611         [3/1]   BNE   *+19 ;abs = 01d1
+  995:        {
+  996:           if (vFlow2 > 0)
+  01c0 fc0000       [3]     LDD   IOMap:370
+  01c3 2704         [3/1]   BEQ   *+6 ;abs = 01c9
+  997:           {
+  998:            vFlow2-- ;
+  01c5 18730000     [5]     DECW  IOMap:370
+  999:           }
+ 1000:           qDown1Shot2 =1;
+  01c9 c601         [1]     LDAB  #1
+  01cb 87           [1]     CLRA  
+  01cc 7c0000       [3]     STD   IOMap:446
+ 1001:        }
+  01cf 204d         [3]     BRA   *+79 ;abs = 021e
+ 1002:        else if  (((I_Button_Down==TRUE) && (V_Screen_Number == Screen_Screen1) && (vTool2Key == 1)) || (qRC2Down == 1)) 
+  01d1 fc0000       [3]     LDD   IOMap:86
+  01d4 04240c       [3]     DBNE  D,*+15 ;abs = 01e3
+  01d7 fc0000       [3]     LDD   IOMap:324
+  01da 042406       [3]     DBNE  D,*+9 ;abs = 01e3
+  01dd fc0000       [3]     LDD   IOMap:390
+  01e0 040406       [3]     DBEQ  D,*+9 ;abs = 01e9
+  01e3 fc0000       [3]     LDD   IOMap:432
+  01e6 042426       [3]     DBNE  D,*+41 ;abs = 020f
+ 1003:        {
+ 1004:           if (As.flow2DnDeb > 0)
+  01e9 c600         [1]     LDAB  #PAGE(As)
+  01eb 5b16         [2]     STAB  /*RPAGE*/22
+  01ed fc0000       [3]     LDD   As:16
+  01f0 2704         [3/1]   BEQ   *+6 ;abs = 01f6
+ 1005:           {
+ 1006:               As.flow2DnDeb-- ;
+  01f2 18730000     [5]     DECW  As:16
+ 1007:           }
+ 1008:           if ((As.flow2DnDeb == 0) &&  (tonFlowIncDec_VALUE ==0))
+  01f6 fc0000       [3]     LDD   As:16
+  01f9 2623         [3/1]   BNE   *+37 ;abs = 021e
+  01fb c600         [1]     LDAB  #PAGE(IOMap)
+  01fd 5b16         [2]     STAB  /*RPAGE*/22
+  01ff fc0000       [3]     LDD   IOMap:578
+  0202 261a         [3/1]   BNE   *+28 ;abs = 021e
+ 1009:           {
+ 1010:              if (vFlow2 > 0)
+  0204 fc0000       [3]     LDD   IOMap:370
+  0207 2715         [3/1]   BEQ   *+23 ;abs = 021e
+ 1011:              {
+ 1012:                vFlow2-- ;
+  0209 18730000     [5]     DECW  IOMap:370
+  020d 200f         [3]     BRA   *+17 ;abs = 021e
+ 1013:              }
+ 1014:           }
+ 1015:         }
+ 1016:         else
+ 1017:         {
+ 1018:          qDown1Shot2 = 0;
+  020f 18790000     [4]     CLRW  IOMap:446
+ 1019:          As.flow2DnDeb = 80;
+  0213 c650         [1]     LDAB  #80
+  0215 87           [1]     CLRA  
+  0216 180b000016   [4]     MOVB  #PAGE(As),/*RPAGE*/22
+  021b 7c0000       [3]     STD   As:16
+ 1020:         }
+ 1021:      
+ 1022:           
+ 1023:      if (tonFlowIncDec_VALUE ==0)
+  021e c600         [1]     LDAB  #PAGE(IOMap)
+  0220 5b16         [2]     STAB  /*RPAGE*/22
+  0222 fc0000       [3]     LDD   IOMap:578
+  0225 2606         [3/1]   BNE   *+8 ;abs = 022d
+ 1024:      {
+ 1025:           tonFlowIncDec_VALUE =4;
+  0227 c604         [1]     LDAB  #4
+  0229 87           [1]     CLRA  
+  022a 7c0000       [3]     STD   IOMap:578
+ 1026:      }
+ 1027:  }
+  022d 0a           [7]     RTC   

@@ -1,0 +1,289 @@
+<!-- VERSION 2015.11.02 -->
+<!--
+* Copyright (C) 2015, HED Inc. All Rights Reserved.
+-->
+
+<UCL>
+  <CFG>
+    <STATE name="BootStrap" dev="MX53" />
+    <DEV name="MX53" vid="15A2" pid="004E"/>
+    <STATE name="Updater"   dev="Updater" />
+    <DEV name="Updater" vid="066F" pid="37FF" />
+  </CFG>
+  
+  <LIST name="Factory-Reset" desc="Format eMMC">
+    <CMD type="boot" body="BootStrap" file ="u-boot.imx-mfgtool" >Read from DDR script from U-Boot to init DDR Memory.</CMD>
+    <CMD type="load" file="uImage-mfgtool" address="0x70800000"
+        loadSection="OTH" setSection="OTH" HasFlashHeader="FALSE" >Doing Kernel.</CMD>
+    <CMD type="load" file="rootfs.img" address="0x70B00000"
+        loadSection="OTH" setSection="OTH" HasFlashHeader="FALSE" >Doing Initramfs.</CMD>
+    <CMD type="jump" > Jumping to OS image. </CMD>
+    <CMD type="find" body="Updater" timeout="240"/>
+    <CMD type="push" body="$ if [ ! -b /dev/mmcblk0 ]; then mknod /dev/mmcblk0 b 179 0; fi"/>
+    <CMD type="push" body="send" file="mksdcard-PM041.sh">Sending partitioning script</CMD>
+    <CMD type="push" body="$ chmod +x $FILE">Running partitioning script</CMD>
+    <CMD type="push" body="$ sh $FILE /dev/mmcblk0 > /dev/tty0 2>&1">Running partitioning script</CMD>
+    <CMD type="push" body="$ sync && sync">Running partitioning script</CMD>
+    <CMD type="push" body="frf">Running partitioning script</CMD>
+    <CMD type="push" body="mknod block/mmcblk0,mmcblk0p1,/dev/mmcblk0p1,block"/>
+    <CMD type="push" body="mknod block/mmcblk0,mmcblk0p2,/dev/mmcblk0p2,block"/>
+    <CMD type="push" body="mknod block/mmcblk0,mmcblk0p3,/dev/mmcblk0p3,block"/>
+    <CMD type="push" body="mknod block/mmcblk0,mmcblk0p4,/dev/mmcblk0p4,block"/>
+    <CMD type="push" body="mknod block/mmcblk0,mmcblk0p5,/dev/mmcblk0p5,block"/>
+    <CMD type="push" body="mknod block/mmcblk0,mmcblk0p6,/dev/mmcblk0p6,block"/>
+    <CMD type="push" body="$ mkfs.vfat -n boot /dev/mmcblk0p1 > /dev/tty0 2>&1">Formatting boot partition</CMD>
+    <CMD type="push" body="$ mkfs.ext2 /dev/mmcblk0p2 -L persistent > /dev/tty0 2>&1">Formatting persistent data partition</CMD>
+    <CMD type="push" body="$ mkfs.ext4 /dev/mmcblk0p3 -L rootfs1 > /dev/tty0 2>&1">Formatting rootfs partition</CMD>
+    <CMD type="push" body="$ mkfs.ext4 /dev/mmcblk0p4 -L rootfs2 > /dev/tty0 2>&1">Formatting rootfs partition</CMD>
+    <CMD type="push" body="$ mkfs.ext4 /dev/mmcblk0p5 -L apps > /dev/tty0 2>&1">Formatting apps partition</CMD>
+    <CMD type="push" body="$ mkfs.ext4 /dev/mmcblk0p6 -L data > /dev/tty0 2>&1">Formatting data partition</CMD>
+    <CMD type="push" body="$ echo '--------------------------------------------------' > /dev/tty0 2>&1"></CMD>
+    <CMD type="push" body="$ sync && sync">Finishing formatting</CMD>
+    <CMD type="push" body="$ echo Formatting Complete > /dev/tty0 2>&1">Done</CMD>
+    <CMD type="push" body="$ mkdir -p /mnt/boot > /dev/tty0 2>&1">Mounting partitions</CMD>
+    <CMD type="push" body="$ mkdir -p /mnt/root > /dev/tty0 2>&1">Mounting partitions</CMD>
+    <CMD type="push" body="$ mkdir -p /mnt/apps > /dev/tty0 2>&1">Mounting partitions</CMD>
+    <CMD type="push" body="$ mkdir -p /mnt/data > /dev/tty0 2>&1">Mounting partitions</CMD>
+    <CMD type="push" body="$ mount /dev/mmcblk0p1 /mnt/boot > /dev/tty0 2>&1">Mounting partitions</CMD>
+    <CMD type="push" body="$ mount -t ext4 /dev/mmcblk0p6 /mnt/data > /dev/tty0 2>&1">Mounting partitions</CMD>
+    <CMD type="push" body="$ mkdir -pv /mnt/data/maps > /dev/tty0 2>&1">Mounting partitions</CMD>
+  </LIST>
+
+  <LIST name="Init" desc="Initialize">
+    <CMD type="boot" body="BootStrap" file ="u-boot.imx-mfgtool" >Read from DDR script from U-Boot to init DDR Memory.</CMD>
+    <CMD type="load" file="uImage-mfgtool" address="0x70800000"
+        loadSection="OTH" setSection="OTH" HasFlashHeader="FALSE" >Doing Kernel.</CMD>
+    <CMD type="load" file="rootfs.img" address="0x70B00000"
+        loadSection="OTH" setSection="OTH" HasFlashHeader="FALSE" >Doing Initramfs.</CMD>
+    <CMD type="jump" > Jumping to OS image. </CMD>
+    <CMD type="find" body="Updater" timeout="240"/>
+    <CMD type="push" body="$ if [ ! -b /dev/mmcblk0 ]; then mknod /dev/mmcblk0 b 179 0; fi"/>
+    <CMD type="push" body="mknod block/mmcblk0,mmcblk0p1,/dev/mmcblk0p1,block"/>
+    <CMD type="push" body="mknod block/mmcblk0,mmcblk0p2,/dev/mmcblk0p2,block"/>
+    <CMD type="push" body="mknod block/mmcblk0,mmcblk0p3,/dev/mmcblk0p3,block"/>
+    <CMD type="push" body="mknod block/mmcblk0,mmcblk0p4,/dev/mmcblk0p4,block"/>
+    <CMD type="push" body="mknod block/mmcblk0,mmcblk0p5,/dev/mmcblk0p5,block"/>
+    <CMD type="push" body="mknod block/mmcblk0,mmcblk0p6,/dev/mmcblk0p6,block"/>
+    <CMD type="push" body="$ mkdir -p /mnt/boot > /dev/tty0 2>&1">Mounting partitions</CMD>
+    <CMD type="push" body="$ mkdir -p /mnt/root > /dev/tty0 2>&1">Mounting partitions</CMD>
+    <CMD type="push" body="$ mkdir -p /mnt/apps > /dev/tty0 2>&1">Mounting partitions</CMD>
+    <CMD type="push" body="$ mkdir -p /mnt/data > /dev/tty0 2>&1">Mounting partitions</CMD>
+    <CMD type="push" body="$ mount /dev/mmcblk0p1 /mnt/boot > /dev/tty0 2>&1">Mounting partitions</CMD>
+    <CMD type="push" body="$ mount -t ext4 /dev/mmcblk0p6 /mnt/data > /dev/tty0 2>&1">Mounting partitions</CMD>
+  </LIST>
+
+  <LIST name="Cleanup" desc="Cleanup">
+    <CMD type="push" body="$ umount /mnt/boot > /dev/tty0 2>&1">Un-mounting partitions</CMD>
+    <CMD type="push" body="$ umount /mnt/data > /dev/tty0 2>&1">Un-mounting partitions</CMD>
+    <CMD type="push" body="$ sync && sync">Syncing</CMD>
+    <CMD type="push" body="$ echo Update Complete! > /dev/tty0 2>&1">Done</CMD>
+  </LIST>
+
+  <LIST name="Calibrate-Touchscreen" desc="Calibrate Touchscreen">
+    <CMD type="push" body="$ mkdir /mnt/persistent> /dev/tty0 2>&1">Initializing touchscreen calibration</CMD>
+    <CMD type="push" body="$ mount -o ro /dev/mmcblk0p2 /mnt/persistent> /dev/tty0 2>&1">Initializing touchscreen calibration</CMD>
+    <CMD type="push" body="$ /etc/init.d/input-sx865x calibrate &">Touch points on display to calibrate</CMD>
+  </LIST>
+
+  <LIST name="u-boot.imx" desc="Load new u-boot">
+    <CMD type="push" body="$ echo '--------------------------------------------------' > /dev/tty0 2>&1"></CMD>
+    <CMD type="push" body="$ echo '*** Sending u-boot' > /dev/tty0 2>&1">Sending u-boot</CMD>
+    <CMD type="push" body="send" file="download/u-boot.imx">Sending u-boot</CMD>
+    <CMD type="push" body="$ echo '***Installing u-boot***' > /dev/tty0 2>&1">Installing u-boot</CMD>
+    <CMD type="push" body="$ umount /mnt/boot > /dev/tty0 2>&1">Installing u-boot</CMD>
+    <CMD type="push" body="$ umount /mnt/data > /dev/tty0 2>&1">Installing u-boot</CMD>
+    <CMD type="push" body="$ echo 1 > /sys/class/mmc_host/mmc0/mmc0\:0001/boot_config">Installing u-boot</CMD>
+    <CMD type="push" body="$ dd if=/dev/zero of=/dev/mmcblk0 bs=1024 count=1022 seek=1 > /dev/tty0 2>&1">Installing u-boot</CMD>
+    <CMD type="push" body="$ sync && sync">Installing u-boot</CMD>
+    <CMD type="push" body="$ dd if=$FILE of=/dev/mmcblk0 bs=1024 seek=1 > /dev/tty0 2>&1">Installing u-boot</CMD>
+    <CMD type="push" body="$ sync && sync">Installing u-boot</CMD>
+    <CMD type="push" body="$ echo 2 > /sys/class/mmc_host/mmc0/mmc0\:0001/boot_config">Installing u-boot</CMD>
+    <CMD type="push" body="$ dd if=/dev/zero of=/dev/mmcblk0 bs=1024 count=1022 seek=1 > /dev/tty0 2>&1">Installing u-boot</CMD>
+    <CMD type="push" body="$ sync && sync">Installing u-boot</CMD>
+    <CMD type="push" body="$ dd if=$FILE of=/dev/mmcblk0 bs=1024 seek=1 > /dev/tty0 2>&1">Installing u-boot</CMD>
+    <CMD type="push" body="$ echo '*** Finishing u-boot write' > /dev/tty0 2>&1">Finishing u-boot write</CMD>
+    <CMD type="push" body="$ sync && sync">Finishing u-boot write</CMD>
+    <CMD type="push" body="$ echo 8 > /sys/class/mmc_host/mmc0/mmc0\:0001/boot_config">Finishing u-boot write</CMD>
+    <CMD type="push" body="$ echo 2 > /sys/class/mmc_host/mmc0/mmc0\:0001/boot_bus_config">Finishing u-boot write</CMD>
+    <CMD type="push" body="frf">Finishing u-boot write</CMD>
+    <CMD type="push" body="$ sync && sync">Finishing u-boot write</CMD>
+    <CMD type="push" body="$ mount /dev/mmcblk0p1 /mnt/boot > /dev/tty0 2>&1">Finishing u-boot write</CMD>
+    <CMD type="push" body="$ mount -t ext4 /dev/mmcblk0p6 /mnt/data > /dev/tty0 2>&1">Finishing u-boot write</CMD>
+    <CMD type="push" body="$ echo '*** u-boot installation complete' > /dev/tty0 2>&1">u-boot installation complete</CMD>
+  </LIST>
+
+  <LIST name="u-boot.imx-verify" desc="Verify u-boot">
+    <CMD type="push" body="$ echo '--------------------------------------------------' > /dev/tty0 2>&1"></CMD>
+    <CMD type="push" body="$ echo '*** Checking u-boot checksum' > /dev/tty0 2>&1">Checking u-boot checksum</CMD>
+    <CMD type="push" body="$ echo 'NOT IMPLEMENTED - SKIPPING' > /dev/tty0 2>&1">Checking u-boot checksum</CMD>
+    <CMD type="push" body="$ sync && sync">Checking u-boot checksum</CMD>
+  </LIST>
+
+  <LIST name="splash" desc="Load new splash image">
+    <CMD type="push" body="$ echo '--------------------------------------------------' > /dev/tty0 2>&1"></CMD>
+    <CMD type="push" body="$ echo '*** Sending splash image' > /dev/tty0 2>&1">Sending splash image</CMD>
+    <CMD type="push" body="send" file="download/splash">Sending splash image</CMD>
+    <CMD type="push" body="$ cp -vf $FILE /tmp/splash > /dev/tty0 2>&1">Sending splash image</CMD>
+    <CMD type="push" body="$ sync && sync">Sending splash image</CMD>
+    <CMD type="push" body="frf">Sending splash image</CMD>
+    <CMD type="push" body="$ echo '*** Installing splash image' > /dev/tty0 2>&1">Installing splash image</CMD>
+    <CMD type="push" body="$ convert /tmp/splash ppm:/mnt/boot/splash > /dev/tty0 2>&1">Installing splash image</CMD>
+    <CMD type="push" body="$ echo '*** Finishing splash image write' > /dev/tty0 2>&1">Finishing splash image write</CMD>
+    <CMD type="push" body="$ rm -f /tmp/splash">Finishing splash image write</CMD>
+    <CMD type="push" body="$ sync && sync">Finishing splash image write</CMD>
+    <CMD type="push" body="$ echo '*** splash image installation complete' > /dev/tty0 2>&1">splash image installation complete</CMD>
+  </LIST>
+
+  <LIST name="splash-verify" desc="Verify splash image">
+    <CMD type="push" body="$ echo '--------------------------------------------------' > /dev/tty0 2>&1"></CMD>
+    <CMD type="push" body="$ echo '*** Checking splash image checksum' > /dev/tty0 2>&1">Checking splash image checksum</CMD>
+    <CMD type="push" body="$ echo 'NOT IMPLEMENTED - SKIPPING' > /dev/tty0 2>&1">Checking splash image checksum</CMD>
+    <CMD type="push" body="$ sync && sync">Checking splash image checksum</CMD>
+  </LIST>
+
+  <LIST name="boot" desc="Load new boot files">
+    <CMD type="push" body="$ echo '--------------------------------------------------' > /dev/tty0 2>&1"></CMD>
+    <CMD type="push" body="$ echo '*** Creating bootpath.txt file' > /dev/tty0 2>&1">Creating bootpath.txt file</CMD>
+    <CMD type="push" body="$ echo 'bootpath=a' > /mnt/boot/bootpath.txt">Creating bootpath.txt file</CMD>
+    <CMD type="push" body="$ echo 'rootpartition=3' >> /mnt/boot/bootpath.txt">Creating bootpath.txt file</CMD>
+    <CMD type="push" body="$ echo '*** Installing boot files' > /dev/tty0 2>&1">Installing boot files</CMD>
+    <CMD type="push" body="$ mkdir -pv /mnt/boot/a /mnt/boot/b > /dev/tty0 2>&1">Installing boot files</CMD>
+    <CMD type="push" body="pipe BZIP2=--small tar -xjv -C /mnt/boot/a > /dev/tty0 2>&1" file="download/boot.tar.bz2">Installing boot files</CMD>
+    <CMD type="push" body="$ sync && sync">Installing boot files write</CMD>
+    <CMD type="push" body="frf">Installing boot files write</CMD> -->
+    <CMD type="push" body="pipe BZIP2=--small tar -xjv -C /mnt/boot/b > /dev/tty0 2>&1" file="download/boot.tar.bz2">Installing boot files</CMD>
+    <CMD type="push" body="$ echo '*** Finishing boot files write' > /dev/tty0 2>&1">Finishing boot files write</CMD>
+    <CMD type="push" body="$ sync && sync">Finishing boot files write</CMD>
+    <CMD type="push" body="frf">Finishing boot files write</CMD> -->
+    <CMD type="push" body="$ echo '*** Updating bootpath.txt file' > /dev/tty0 2>&1">Updating bootpath.txt file</CMD>
+    <CMD type="push" body="$ cat /mnt/boot/bootpath.txt | grep rootpartition">Check bootpath.txt file</CMD>
+    <CMD type="push" body="$ echo $(cat /mnt/boot/bootpath.txt | grep rootpartition) > /mnt/boot/bootpath.txt">Updating bootpath.txt file</CMD>
+    <CMD type="push" body="$ echo 'bootpath=a' >> /mnt/boot/bootpath.txt">Updating bootpath.txt file</CMD>
+    <CMD type="push" body="$ echo '*** Boot files installation complete' > /dev/tty0 2>&1">Boot files installation complete</CMD>
+  </LIST>
+
+  <LIST name="boot-verify" desc="Verify boot files">
+    <CMD type="push" body="$ echo '--------------------------------------------------' > /dev/tty0 2>&1"></CMD>
+    <CMD type="push" body="$ echo '*** Checking boot files checksum' > /dev/tty0 2>&1">Checking boot files checksum</CMD>
+    <CMD type="push" body="send" file="download/boot.md5">Checking bootfiles checksum</CMD>
+    <CMD type="push" body="$ cd /mnt/boot/a/ && md5sum -c $FILE > /dev/tty0 2>&1">Checking boot files checksum</CMD>
+    <CMD type="push" body="$ cd /">Checking boot files checksum</CMD>
+    <CMD type="push" body="frf">Checking boot files checksum</CMD>
+  </LIST>
+
+  <LIST name="rootfs" desc="Load new rootfs">
+    <CMD type="push" body="$ echo '--------------------------------------------------' > /dev/tty0 2>&1"></CMD>
+    <CMD type="push" body="$ echo '*** Preparing rootfs partition' > /dev/tty0 2>&1">Preparing rootfs partition</CMD>
+    <CMD type="push" body="$ mkfs.ext4 /dev/mmcblk0p3 -L rootfs > /dev/tty0 2>&1">Preparing rootfs partition</CMD>
+    <CMD type="push" body="$ mount -t ext4 /dev/mmcblk0p3 /mnt/root > /dev/tty0 2>&1">Preparing rootfs partition</CMD>
+    <CMD type="push" body="$ echo '*** Installing rootfs' > /dev/tty0 2>&1">Installing rootfs</CMD>
+    <CMD type="push" body="pipe BZIP2=--small tar -xjv -C /mnt/root > /dev/tty0 2>&1" file="download/rootfs.tar.bz2">Installing rootfs</CMD>
+    <CMD type="push" body="$ echo '*** Finishing rootfs write' > /dev/tty0 2>&1">Finishing rootfs write</CMD>
+    <CMD type="push" body="$ sync && sync">Finishing rootfs write</CMD>
+    <CMD type="push" body="frf">Finishing rootfs write</CMD>
+    <CMD type="push" body="$ umount /mnt/root > /dev/tty0 2>&1">Finishing rootfs write</CMD>
+    <CMD type="push" body="$ cat /mnt/boot/bootpath.txt | grep bootpath">Checking bootpath.txt file</CMD>
+    <CMD type="push" body="$ echo $(cat /mnt/boot/bootpath.txt | grep bootpath) > /mnt/boot/bootpath.txt">Updating bootpath.txt file</CMD>
+    <CMD type="push" body="$ echo 'rootpartition=3' >> /mnt/boot/bootpath.txt">Updating bootpath.txt file</CMD>
+    <CMD type="push" body="$ echo '*** rootfs installation complete' > /dev/tty0 2>&1">rootfs installation complete</CMD>
+  </LIST>
+
+  <LIST name="rootfs-verify" desc="Verify rootfs">
+    <CMD type="push" body="$ echo '*** Checking rootfs checksum' > /dev/tty0 2>&1">Checking rootfs checksum</CMD>
+    <CMD type="push" body="$ mount -t ext4 /dev/mmcblk0p3 /mnt/root > /dev/tty0 2>&1">Checking rootfs checksum</CMD>
+    <CMD type="push" body="send" file="download/rootfs.md5">Checking rootfs checksum</CMD>
+    <CMD type="push" body="$ cd /mnt/root/ && md5sum -c $FILE > /dev/tty0 2>&1">Checking rootfs checksum</CMD>
+    <CMD type="push" body="$ cd /">Checking rootfs checksum</CMD>
+    <CMD type="push" body="frf">Checking rootfs checksum</CMD>
+    <CMD type="push" body="$ umount /mnt/root > /dev/tty0 2>&1">Checking rootfs checksum</CMD>
+  </LIST>
+
+  <LIST name="apps" desc="Load new apps">
+    <CMD type="push" body="$ echo '--------------------------------------------------' > /dev/tty0 2>&1"></CMD>
+    <CMD type="push" body="$ echo '*** Preparing apps directory' > /dev/tty0 2>&1">Preparing apps directory</CMD>
+    <CMD type="push" body="$ mkfs.ext4 /dev/mmcblk0p5 -L apps > /dev/tty0 2>&1">Formatting apps partition</CMD>
+    <CMD type="push" body="$ mount -t ext4 /dev/mmcblk0p5 /mnt/apps > /dev/tty0 2>&1">Formatting apps partitions</CMD>
+    <CMD type="push" body="$ mkdir -pv /mnt/apps/apps1 /mnt/apps/apps2 > /dev/tty0 2>&1">Installing apps</CMD>
+    <CMD type="push" body="$ cd /mnt/apps && ln -sfv apps1 apps > /dev/tty0 2>&1">Installing apps</CMD>
+    <CMD type="push" body="$ echo '*** Installing apps' > /dev/tty0 2>&1">Installing apps</CMD>
+    <CMD type="push" body="pipe BZIP2=--small tar -xjv -C /mnt/apps/apps > /dev/tty0 2>&1" file="download/apps.tar.bz2">Installing apps</CMD>
+    <CMD type="push" body="$ echo '*** Finishing apps write' > /dev/tty0 2>&1">Finishing apps write</CMD>
+    <CMD type="push" body="$ sync && sync">Finishing apps write</CMD>
+    <CMD type="push" body="frf">Finishing apps write</CMD>
+    <CMD type="push" body="$ umount /mnt/apps > /dev/tty0 2>&1">Finishing apps write</CMD>
+    <CMD type="push" body="$ echo '*** apps installation complete' > /dev/tty0 2>&1">apps installation complete</CMD>
+  </LIST>
+
+  <LIST name="apps-verify" desc="Verify apps">
+    <CMD type="push" body="$ echo '*** Checking apps checksum' > /dev/tty0 2>&1">Checking apps checksum</CMD>
+    <CMD type="push" body="$ mount -t ext4 /dev/mmcblk0p5 /mnt/apps > /dev/tty0 2>&1">Checking apps checksum</CMD>
+    <CMD type="push" body="send" file="download/apps.md5">Checking apps checksum</CMD>
+    <CMD type="push" body="$ cd /mnt/apps/apps && md5sum -c $FILE > /dev/tty0 2>&1">Checking apps checksum</CMD>
+    <CMD type="push" body="$ cd /">Checking apps checksum</CMD>
+    <CMD type="push" body="frf">Checking apps checksum</CMD>
+    <CMD type="push" body="$ umount /mnt/apps > /dev/tty0 2>&1">Checking apps checksum</CMD>
+  </LIST>
+
+  <LIST name="xml" desc="Load new xml">
+    <CMD type="push" body="$ echo '--------------------------------------------------' > /dev/tty0 2>&1"></CMD>
+    <CMD type="push" body="$ echo '*** Preparing XML directory' > /dev/tty0 2>&1">Preparing XML directory</CMD>
+    <CMD type="push" body="$ rm -rfv /mnt/data/Arranger/xml > /dev/tty0 2>&1">Preparing XML directory</CMD>
+    <CMD type="push" body="$ echo '*** Installing XML' > /dev/tty0 2>&1">Installing XML</CMD>
+    <CMD type="push" body="$ mkdir -pv /mnt/data/Arranger/xml > /dev/tty0 2>&1">Installing XML</CMD>
+    <CMD type="push" body="pipe BZIP2=--small tar -xjv -C /mnt/data/Arranger/xml > /dev/tty0 2>&1" file="download/xml.tar.bz2">Installing XML</CMD>
+    <CMD type="push" body="$ echo '*** Finishing XML write' > /dev/tty0 2>&1">Finishing XML write</CMD>
+    <CMD type="push" body="$ sync && sync">Finishing XML write</CMD>
+    <CMD type="push" body="frf">Finishing XML write</CMD>
+    <CMD type="push" body="$ echo '*** XML installation complete' > /dev/tty0 2>&1">XML installation complete</CMD>
+  </LIST>
+
+  <LIST name="xml-verify" desc="Verify xml">
+    <CMD type="push" body="$ echo '*** Checking xml checksum' > /dev/tty0 2>&1">Checking xml checksum</CMD>
+    <CMD type="push" body="send" file="download/xml.md5">Checking xml checksum</CMD>
+    <CMD type="push" body="$ cd /mnt/data/Arranger/xml && md5sum -c $FILE > /dev/tty0 2>&1">Checking xml checksum</CMD>
+    <CMD type="push" body="$ cd /">Checking xml checksum</CMD>
+    <CMD type="push" body="frf">Checking xml checksum</CMD>
+  </LIST>
+
+  <LIST name="images" desc="Load new images">
+    <CMD type="push" body="$ echo '--------------------------------------------------' > /dev/tty0 2>&1"></CMD>
+    <CMD type="push" body="$ echo '*** Preparing images directory' > /dev/tty0 2>&1">Preparing images directory</CMD>
+    <CMD type="push" body="$ rm -rfv /mnt/data/Arranger/images/* > /dev/tty0 2>&1">Preparing images directory</CMD>
+    <CMD type="push" body="$ echo '*** Installing images' > /dev/tty0 2>&1">Installing images</CMD>
+    <CMD type="push" body="$ mkdir -pv /mnt/data/Arranger/images > /dev/tty0 2>&1">Installing images</CMD>
+    <CMD type="push" body="pipe BZIP2=--small tar -xjv -C /mnt/data/Arranger/images > /dev/tty0 2>&1" file="download/images.tar.bz2">Installing images</CMD>
+    <CMD type="push" body="$ echo '*** Finishing images write' > /dev/tty0 2>&1">Finishing images write</CMD>
+    <CMD type="push" body="$ sync && sync">Finishing images write</CMD>
+    <CMD type="push" body="frf">Finishing images write</CMD>
+    <CMD type="push" body="$ echo '*** images installation complete' > /dev/tty0 2>&1">images installation complete</CMD>
+  </LIST>
+
+  <LIST name="images-verify" desc="Verify images">
+    <CMD type="push" body="$ echo '*** Checking images checksum' > /dev/tty0 2>&1">Checking images checksum</CMD>
+    <CMD type="push" body="send" file="download/images.md5">Checking images checksum</CMD>
+    <CMD type="push" body="$ cd /mnt/data/Arranger/images && md5sum -c $FILE > /dev/tty0 2>&1">Checking images checksum</CMD>
+    <CMD type="push" body="$ cd /">Checking images checksum</CMD>
+    <CMD type="push" body="frf">Checking images checksum</CMD>
+  </LIST>
+
+  <LIST name="fonts" desc="Load new fonts">
+    <CMD type="push" body="$ echo '--------------------------------------------------' > /dev/tty0 2>&1"></CMD>
+    <CMD type="push" body="$ echo '*** Preparing fonts directory' > /dev/tty0 2>&1">Preparing fonts directory</CMD>
+    <CMD type="push" body="$ rm -fv /mnt/data/Arranger/fonts/* > /dev/tty0 2>&1">Preparing fonts directory</CMD>
+    <CMD type="push" body="$ echo '*** Installing fonts' > /dev/tty0 2>&1">Installing fonts</CMD>
+    <CMD type="push" body="$ mkdir -pv /mnt/data/Arranger/fonts > /dev/tty0 2>&1">Installing fonts</CMD>
+    <CMD type="push" body="pipe BZIP2=--small tar -xjv -C /mnt/data/Arranger/fonts > /dev/tty0 2>&1" file="download/fonts.tar.bz2">Installing fonts</CMD>
+    <CMD type="push" body="$ echo '*** Finishing fonts write' > /dev/tty0 2>&1">Finishing fonts write</CMD>
+    <CMD type="push" body="$ sync && sync">Finishing fonts write</CMD>
+    <CMD type="push" body="frf">Finishing fonts write</CMD>
+    <CMD type="push" body="$ echo '*** fonts installation complete' > /dev/tty0 2>&1">fonts installation complete</CMD>
+  </LIST>
+
+  <LIST name="fonts-verify" desc="Verify fonts">
+    <CMD type="push" body="$ echo '*** Checking fonts checksum' > /dev/tty0 2>&1">Checking fonts checksum</CMD>
+    <CMD type="push" body="send" file="download/fonts.md5">Checking fonts checksum</CMD>
+    <CMD type="push" body="$ cd /mnt/data/Arranger/fonts && md5sum -c $FILE > /dev/tty0 2>&1">Checking fonts checksum</CMD>
+    <CMD type="push" body="$ cd /">Checking fonts checksum</CMD>
+    <CMD type="push" body="frf">Checking fonts checksum</CMD>
+  </LIST>
+</UCL>

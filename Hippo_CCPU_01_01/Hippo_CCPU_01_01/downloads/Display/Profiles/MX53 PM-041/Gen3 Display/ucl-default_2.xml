@@ -1,0 +1,13 @@
+<!--
+* Copyright (C) 2013, HED Inc. All Rights Reserved.
+-->
+
+<UCL>
+  <CFG>
+    <STATE name="BootStrap" dev="MX53" />
+    <DEV name="MX53" vid="15A2" pid="004E"/>
+    <STATE name="Updater"   dev="Updater" />
+    <DEV name="Updater" vid="066F" pid="37FF" />
+  </CFG>
+  
+  <LIST name="MX53-PM-041-eMMC-selectfs" desc="Load selected new eMMC">
